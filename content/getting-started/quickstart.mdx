@@ -1,0 +1,208 @@
+---
+title: Quickstart
+description: Learn how to query the OpenModels API to search models, browse capabilities, and compare providers in minutes.
+---
+
+# Quickstart
+
+The OpenModels API gives you programmatic access to the full model registry — search models, filter by capability, and compare providers with pricing and latency data.
+
+**Base URL:** `https://api.openmodels.run`
+
+No authentication is required. All endpoints are public and read-only.
+
+## Search Models
+
+Find models by name or keyword using the search endpoint:
+
+```bash
+curl "https://api.openmodels.run/api/models?search=deepseek"
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "deepseek-v3",
+      "name": "DeepSeek V3",
+      "vendor": "deepseek",
+      "capabilities": ["chat", "reasoning", "code"],
+      "context_window": 128000,
+      "max_output_tokens": 8192
+    },
+    {
+      "id": "deepseek-r1",
+      "name": "DeepSeek R1",
+      "vendor": "deepseek",
+      "capabilities": ["chat", "reasoning"],
+      "context_window": 128000,
+      "max_output_tokens": 8192
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 2
+  }
+}
+```
+
+### Key Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique model identifier used in other API calls |
+| `vendor` | The organization that created the model |
+| `capabilities` | What the model can do (chat, reasoning, vision, code, etc.) |
+| `context_window` | Maximum input tokens the model accepts |
+| `max_output_tokens` | Maximum tokens the model can generate |
+
+## Browse Models by Capability
+
+Filter models by what they can do — reasoning, vision, code generation, and more:
+
+```bash
+curl "https://api.openmodels.run/api/models?capability=vision&limit=5"
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "vendor": "openai",
+      "capabilities": ["chat", "vision", "code", "reasoning"],
+      "context_window": 128000,
+      "max_output_tokens": 16384
+    },
+    {
+      "id": "gemini-2-5-pro",
+      "name": "Gemini 2.5 Pro",
+      "vendor": "google",
+      "capabilities": ["chat", "vision", "reasoning", "code"],
+      "context_window": 1048576,
+      "max_output_tokens": 65536
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 5,
+    "total": 12
+  }
+}
+```
+
+### Available Capabilities
+
+Use any of these values with the `capability` filter:
+
+- `chat` — General conversation
+- `reasoning` — Complex multi-step reasoning
+- `vision` — Image understanding
+- `code` — Code generation and analysis
+- `function_calling` — Tool use and function calls
+
+## Get Model Details
+
+Retrieve full details for a specific model:
+
+```bash
+curl "https://api.openmodels.run/api/models/deepseek-v3"
+```
+
+**Response:**
+
+```json
+{
+  "id": "deepseek-v3",
+  "name": "DeepSeek V3",
+  "vendor": "deepseek",
+  "description": "DeepSeek's flagship general-purpose model with strong reasoning and coding capabilities.",
+  "capabilities": ["chat", "reasoning", "code"],
+  "context_window": 128000,
+  "max_output_tokens": 8192,
+  "release_date": "2025-01-20",
+  "providers": ["deepseek", "deepinfra", "together", "fireworks"]
+}
+```
+
+## Compare Providers
+
+See which providers offer a model and compare their pricing and performance:
+
+```bash
+curl "https://api.openmodels.run/api/models/deepseek-v3/providers"
+```
+
+**Response:**
+
+```json
+{
+  "model_id": "deepseek-v3",
+  "providers": [
+    {
+      "provider_id": "deepseek",
+      "provider_name": "DeepSeek",
+      "model_id_on_provider": "deepseek-chat",
+      "pricing": {
+        "input_per_million": 0.27,
+        "output_per_million": 1.10,
+        "currency": "USD"
+      }
+    },
+    {
+      "provider_id": "deepinfra",
+      "provider_name": "DeepInfra",
+      "model_id_on_provider": "deepseek-ai/DeepSeek-V3",
+      "pricing": {
+        "input_per_million": 0.40,
+        "output_per_million": 0.89,
+        "currency": "USD"
+      }
+    },
+    {
+      "provider_id": "together",
+      "provider_name": "Together AI",
+      "model_id_on_provider": "deepseek-ai/DeepSeek-V3",
+      "pricing": {
+        "input_per_million": 0.30,
+        "output_per_million": 0.90,
+        "currency": "USD"
+      }
+    }
+  ]
+}
+```
+
+### Provider Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `provider_id` | Unique provider identifier |
+| `model_id_on_provider` | The model ID to use when calling this provider's API |
+| `pricing.input_per_million` | Cost per 1M input tokens (USD) |
+| `pricing.output_per_million` | Cost per 1M output tokens (USD) |
+
+## Pagination
+
+All list endpoints support pagination:
+
+```bash
+curl "https://api.openmodels.run/api/models?page=2&limit=10"
+```
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `page` | 1 | Page number (1-indexed) |
+| `limit` | 20 | Items per page (max 100) |
+
+## Next Steps
+
+- [API Reference](/api-reference) — Full documentation for all endpoints, parameters, and response schemas
+- [Concepts](/getting-started/concepts) — Understand the registry structure (models, providers, mappings)
+- [Architecture](/architecture/overview) — How the platform components work together

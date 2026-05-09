@@ -1,0 +1,279 @@
+---
+title: Telemetry API
+description: API reference for provider health monitoring, latency metrics, and ranked provider selection — includes endpoints for health status history, latency measurements, and composite-scored provider rankings.
+---
+
+# Telemetry API
+
+The Telemetry API provides real-time and historical observability data for inference providers. Use it to check provider health status, measure latency metrics, and retrieve providers ranked by a composite score combining uptime, latency, and price.
+
+## Provider Health
+
+```
+GET /api/telemetry/health/:provider_id
+```
+
+Returns health status history for a provider, including up/down status checks with timestamps and response times.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `provider_id` | string | Yes | The provider's unique identifier (e.g. `openai`, `anthropic`) |
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `period` | string | No | `7d` | Time period for health history (e.g. `1d`, `7d`, `30d`) |
+| `limit` | integer | No | `50` | Maximum number of health check entries to return (max 500) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/telemetry/health/openai?period=7d&limit=20"
+```
+
+### Example Response
+
+```json
+{
+  "provider_id": "openai",
+  "provider_name": "OpenAI",
+  "period": "7d",
+  "uptime_percentage": 99.82,
+  "checks": [
+    {
+      "status": "up",
+      "checked_at": "2025-07-10T14:30:00.000Z",
+      "response_time_ms": 142
+    },
+    {
+      "status": "up",
+      "checked_at": "2025-07-10T14:25:00.000Z",
+      "response_time_ms": 138
+    },
+    {
+      "status": "down",
+      "checked_at": "2025-07-10T03:15:00.000Z",
+      "response_time_ms": null
+    },
+    {
+      "status": "up",
+      "checked_at": "2025-07-10T03:10:00.000Z",
+      "response_time_ms": 156
+    }
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provider_id` | string | The requested provider's identifier |
+| `provider_name` | string | Human-readable provider name |
+| `period` | string | The requested time period |
+| `uptime_percentage` | number | Percentage of successful health checks in the period (0–100) |
+| `checks` | array | Array of health check entries, ordered by most recent first |
+| `checks[].status` | string | Health check result: `up` or `down` |
+| `checks[].checked_at` | string | ISO 8601 timestamp when the check was performed |
+| `checks[].response_time_ms` | integer \| null | Response time in milliseconds, or `null` if the check failed |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `400` | `BAD_REQUEST` | Invalid query parameters (e.g. unsupported `period` value) |
+| `404` | `NOT_FOUND` | Provider with the given ID does not exist |
+
+---
+
+## Provider Latency
+
+```
+GET /api/telemetry/latency/:provider_id
+```
+
+Returns latency metrics for a provider, including time-to-first-token and total response time measurements.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `provider_id` | string | Yes | The provider's unique identifier (e.g. `together-ai`, `deepseek`) |
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `period` | string | No | `7d` | Time period for latency data (e.g. `1d`, `7d`, `30d`) |
+| `limit` | integer | No | `50` | Maximum number of latency measurements to return (max 500) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/telemetry/latency/together-ai?period=7d&limit=10"
+```
+
+### Example Response
+
+```json
+{
+  "provider_id": "together-ai",
+  "provider_name": "Together AI",
+  "period": "7d",
+  "average_ttft_ms": 245,
+  "average_total_ms": 1820,
+  "p95_ttft_ms": 410,
+  "p95_total_ms": 3200,
+  "measurements": [
+    {
+      "time_to_first_token_ms": 230,
+      "total_response_time_ms": 1750,
+      "measured_at": "2025-07-10T14:30:00.000Z"
+    },
+    {
+      "time_to_first_token_ms": 255,
+      "total_response_time_ms": 1890,
+      "measured_at": "2025-07-10T14:25:00.000Z"
+    },
+    {
+      "time_to_first_token_ms": 410,
+      "total_response_time_ms": 3150,
+      "measured_at": "2025-07-10T14:20:00.000Z"
+    },
+    {
+      "time_to_first_token_ms": 198,
+      "total_response_time_ms": 1620,
+      "measured_at": "2025-07-10T14:15:00.000Z"
+    }
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provider_id` | string | The requested provider's identifier |
+| `provider_name` | string | Human-readable provider name |
+| `period` | string | The requested time period |
+| `average_ttft_ms` | integer | Average time-to-first-token in milliseconds over the period |
+| `average_total_ms` | integer | Average total response time in milliseconds over the period |
+| `p95_ttft_ms` | integer | 95th percentile time-to-first-token in milliseconds |
+| `p95_total_ms` | integer | 95th percentile total response time in milliseconds |
+| `measurements` | array | Array of latency measurements, ordered by most recent first |
+| `measurements[].time_to_first_token_ms` | integer | Time to first token in milliseconds |
+| `measurements[].total_response_time_ms` | integer | Total response time in milliseconds |
+| `measurements[].measured_at` | string | ISO 8601 timestamp when the measurement was taken |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `400` | `BAD_REQUEST` | Invalid query parameters (e.g. unsupported `period` value) |
+| `404` | `NOT_FOUND` | Provider with the given ID does not exist |
+
+---
+
+## Ranked Providers
+
+```
+GET /api/telemetry/ranked/:model_id
+```
+
+Returns providers ranked by a composite score for a given model. The score combines uptime reliability, latency performance, and pricing to help you choose the best provider.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_id` | string | Yes | The model's unique identifier (e.g. `deepseek-v3`, `gpt-5`) |
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `period` | string | No | `7d` | Time period for scoring data (e.g. `1d`, `7d`, `30d`) |
+| `limit` | integer | No | `10` | Maximum number of ranked providers to return (max 50) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/telemetry/ranked/deepseek-v3?period=7d&limit=5"
+```
+
+### Example Response
+
+```json
+{
+  "model_id": "deepseek-v3",
+  "model_name": "DeepSeek V3",
+  "period": "7d",
+  "ranked_providers": [
+    {
+      "rank": 1,
+      "provider_id": "deepseek",
+      "provider_name": "DeepSeek",
+      "composite_score": 94.5,
+      "uptime_percentage": 99.9,
+      "average_ttft_ms": 180,
+      "average_total_ms": 1400,
+      "input_per_million": 0.27,
+      "output_per_million": 1.10,
+      "currency": "USD"
+    },
+    {
+      "rank": 2,
+      "provider_id": "together-ai",
+      "provider_name": "Together AI",
+      "composite_score": 91.2,
+      "uptime_percentage": 99.7,
+      "average_ttft_ms": 245,
+      "average_total_ms": 1820,
+      "input_per_million": 0.50,
+      "output_per_million": 0.90,
+      "currency": "USD"
+    },
+    {
+      "rank": 3,
+      "provider_id": "deepinfra",
+      "provider_name": "DeepInfra",
+      "composite_score": 88.7,
+      "uptime_percentage": 99.5,
+      "average_ttft_ms": 290,
+      "average_total_ms": 2100,
+      "input_per_million": 0.35,
+      "output_per_million": 0.80,
+      "currency": "USD"
+    }
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model_id` | string | The requested model's identifier |
+| `model_name` | string | Human-readable model name |
+| `period` | string | The time period used for scoring |
+| `ranked_providers` | array | Array of providers sorted by composite score (descending) |
+| `ranked_providers[].rank` | integer | Position in the ranking (1-indexed) |
+| `ranked_providers[].provider_id` | string | Unique provider identifier |
+| `ranked_providers[].provider_name` | string | Human-readable provider name |
+| `ranked_providers[].composite_score` | number | Composite score from 0–100 combining uptime, latency, and price |
+| `ranked_providers[].uptime_percentage` | number | Provider uptime percentage over the period (0–100) |
+| `ranked_providers[].average_ttft_ms` | integer | Average time-to-first-token in milliseconds |
+| `ranked_providers[].average_total_ms` | integer | Average total response time in milliseconds |
+| `ranked_providers[].input_per_million` | number | Cost per 1M input tokens |
+| `ranked_providers[].output_per_million` | number | Cost per 1M output tokens |
+| `ranked_providers[].currency` | string | ISO 4217 currency code |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `400` | `BAD_REQUEST` | Invalid query parameters (e.g. unsupported `period` value) |
+| `404` | `NOT_FOUND` | Model with the given ID does not exist or has no providers |

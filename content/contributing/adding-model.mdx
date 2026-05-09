@@ -1,0 +1,195 @@
+---
+title: Adding a Model
+description: Step-by-step guide for contributing a new AI model to the OpenModels registry.
+---
+
+# Adding a Model
+
+This guide walks you through contributing a new model to the OpenModels registry. Each contribution involves two files: a **model definition** and at least one **provider mapping**.
+
+---
+
+## Prerequisites
+
+Before you begin:
+
+1. **Fork the repository** — Fork [openmodels-run/openmodels](https://github.com/openmodels-run/openmodels) and clone it locally.
+2. **Understand the schema** — Review the [YAML Schemas](/architecture/schemas) reference to familiarize yourself with required fields and valid values.
+3. **Install Python 3.11+** — The validation script requires Python with dependencies from `requirements.txt`.
+
+```bash
+git clone https://github.com/<your-username>/openmodels.git
+cd openmodels
+pip install -r requirements.txt
+```
+
+---
+
+## Step 1: Create the Model YAML File
+
+Create a new file in the `models/` directory. The filename must match the model's `id` field.
+
+**File path:** `models/<model-id>.yaml`
+
+### Complete Example
+
+```yaml
+id: my-new-model
+name: My New Model
+description: >-
+  A brief description of the model's capabilities, architecture,
+  and what makes it unique. Keep this to 2-3 sentences.
+capabilities:
+  - chat
+  - completion
+  - function-calling
+  - code-generation
+modalities:
+  - text
+  - code
+context_window: 128000
+licensing: open-weights
+created_at: "2025-06-01T00:00:00.000Z"
+updated_at: "2025-06-01T00:00:00.000Z"
+```
+
+### Field Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier. Must match the filename (without `.yaml`). |
+| `name` | string | Human-readable display name. |
+| `description` | string | Brief description of capabilities and positioning. |
+| `capabilities` | string[] | Supported capabilities: `chat`, `completion`, `function-calling`, `vision`, `audio`, `code-generation`, `reasoning`. |
+| `modalities` | string[] | Input/output modalities: `text`, `image`, `audio`, `code`. |
+| `context_window` | integer | Maximum context window size in tokens. |
+| `licensing` | string | One of: `proprietary`, `open-source`, `open-weights`, `other`. |
+| `created_at` | ISO 8601 | When the model was first released or announced. |
+| `updated_at` | ISO 8601 | Set to the same value as `created_at` for new entries. |
+
+---
+
+## Step 2: Create the Mapping YAML File
+
+A mapping connects your model to a specific inference provider. Create a file in `mappings/<provider_id>/`.
+
+**File path:** `mappings/<provider_id>/<model-id>.yaml`
+
+The `provider_id` must reference an existing provider in the `providers/` directory. If the provider doesn't exist yet, see [Adding a Provider](/contributing/adding-provider).
+
+### Complete Example
+
+```yaml
+model_id: my-new-model
+provider_id: deepinfra
+provider_model_name: org/my-new-model-v1
+pricing:
+  input_per_million: 0.50
+  output_per_million: 1.50
+  currency: USD
+rate_limits:
+  requests_per_minute: 200
+  tokens_per_minute: 400000
+context_window_override: null
+available_regions:
+  - us-east-1
+  - eu-west-1
+created_at: "2025-06-01T00:00:00.000Z"
+updated_at: "2025-06-01T00:00:00.000Z"
+```
+
+### Field Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model_id` | string | Must match an existing model `id` in `models/`. |
+| `provider_id` | string | Must match an existing provider `id` in `providers/`. |
+| `provider_model_name` | string | The provider's internal model identifier used in API calls. |
+| `pricing.input_per_million` | number | Cost per million input tokens. |
+| `pricing.output_per_million` | number | Cost per million output tokens. |
+| `pricing.currency` | string | ISO 4217 currency code (typically `USD`). |
+| `pricing.cache_write_per_million` | number | *(Optional)* Cost per million tokens for cache writes. |
+| `pricing.cache_read_per_million` | number | *(Optional)* Cost per million tokens for cache reads. |
+| `rate_limits.requests_per_minute` | integer | Maximum API requests per minute. |
+| `rate_limits.tokens_per_minute` | integer | Maximum tokens processed per minute. |
+| `context_window_override` | integer or null | Override the model's default context window, or `null` to use the default. |
+| `available_regions` | string[] | Regions where this model is available from this provider. |
+| `created_at` | ISO 8601 | When this mapping was added. |
+| `updated_at` | ISO 8601 | Set to the same value as `created_at` for new entries. |
+
+---
+
+## Step 3: Validate Locally
+
+Run the validation script to check your files before submitting a pull request:
+
+```bash
+python validate_registry.py
+```
+
+The validator checks:
+
+- **YAML syntax** — Files must be valid, parseable YAML
+- **Required fields** — All required fields are present
+- **Type checking** — Field values match expected types
+- **Referential integrity** — `model_id` and `provider_id` references resolve to existing files
+- **Naming conventions** — Filenames match their `id` field
+
+Fix any errors reported by the script before proceeding.
+
+---
+
+## Step 4: Submit a Pull Request
+
+1. **Create a branch** with a descriptive name:
+   ```bash
+   git checkout -b add-model/my-new-model
+   ```
+
+2. **Commit your changes** with a clear message:
+   ```bash
+   git add models/my-new-model.yaml mappings/deepinfra/my-new-model.yaml
+   git commit -m "feat: add my-new-model with deepinfra mapping"
+   ```
+
+3. **Push and open a PR** against the `main` branch.
+
+### What Reviewers Look For
+
+- All validation checks pass (automated via GitHub Actions)
+- Pricing data is accurate and sourced from official provider documentation
+- The model description is factual and concise
+- Capabilities and modalities are correctly categorized
+- Context window size matches the provider's documentation
+- Rate limits reflect the provider's published defaults
+
+---
+
+## Tips
+
+### Naming Conventions
+
+- Use lowercase kebab-case for model IDs: `my-model-v2`, not `MyModel_V2`
+- Keep IDs short but descriptive: `deepseek-v3`, `claude-sonnet-4-5`
+- Version numbers use hyphens: `gpt-5-4-mini`, not `gpt5.4mini`
+
+### Common Mistakes
+
+- **Mismatched filename and `id`** — The filename (without `.yaml`) must exactly match the `id` field
+- **Missing provider directory** — Mapping files go in `mappings/<provider_id>/`, not directly in `mappings/`
+- **Invalid timestamps** — Use full ISO 8601 format with timezone: `"2025-06-01T00:00:00.000Z"`
+- **Wrong `provider_model_name`** — This should be the exact string the provider's API expects, not the display name
+- **Forgetting referential integrity** — Both `model_id` and `provider_id` must reference existing files
+
+### Adding Multiple Provider Mappings
+
+A single model can have mappings for multiple providers. For example, `llama-4-scout` is available from several providers:
+
+```
+mappings/
+├── cerebras/llama-4-scout.yaml
+├── deepinfra/llama-4-scout.yaml
+└── together/llama-4-scout.yaml
+```
+
+Each mapping file has its own pricing and rate limits specific to that provider.

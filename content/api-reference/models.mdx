@@ -1,0 +1,327 @@
+---
+title: Models API
+description: API reference for listing, searching, and comparing AI models — includes endpoints for model details, provider availability, and side-by-side provider comparison.
+---
+
+# Models API
+
+The Models API lets you browse the OpenModels registry, search for models by name or capability, retrieve full model details, and compare providers serving a given model.
+
+## List Models
+
+```
+GET /api/models
+```
+
+Search and list models in the registry with optional filtering and pagination.
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `search` | string | No | — | Full-text search across model name and description |
+| `capability` | string | No | — | Filter by capability (e.g. `reasoning`, `vision`, `code-generation`) |
+| `modality` | string | No | — | Filter by modality (e.g. `text`, `image`, `audio`) |
+| `page` | integer | No | `1` | Page number (1-indexed) |
+| `limit` | integer | No | `20` | Items per page (max 100) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/models?search=deepseek&capability=reasoning&limit=10"
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "deepseek-v3",
+      "name": "DeepSeek V3",
+      "description": "DeepSeek's third-generation large language model featuring mixture-of-experts architecture, strong multilingual capabilities, and competitive performance on reasoning and coding benchmarks.",
+      "capabilities": ["chat", "completion", "function-calling", "code-generation", "reasoning"],
+      "modalities": ["text", "code"],
+      "context_window": 128000,
+      "licensing": "other",
+      "created_at": "2024-12-01T00:00:00.000Z",
+      "updated_at": "2025-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "deepseek-r1",
+      "name": "DeepSeek R1",
+      "description": "DeepSeek's reasoning-focused model with chain-of-thought capabilities and strong performance on math and logic benchmarks.",
+      "capabilities": ["chat", "completion", "reasoning"],
+      "modalities": ["text", "code"],
+      "context_window": 128000,
+      "licensing": "other",
+      "created_at": "2025-01-20T00:00:00.000Z",
+      "updated_at": "2025-02-01T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data` | array | Array of model objects |
+| `data[].id` | string | Unique model identifier (kebab-case) |
+| `data[].name` | string | Human-readable display name |
+| `data[].description` | string | Detailed description of the model |
+| `data[].capabilities` | string[] | Supported capabilities (e.g. `chat`, `vision`, `reasoning`) |
+| `data[].modalities` | string[] | Supported input/output modalities (e.g. `text`, `image`, `audio`) |
+| `data[].context_window` | integer | Maximum context window size in tokens |
+| `data[].licensing` | string | License type (`proprietary`, `apache-2.0`, `mit`, `other`, etc.) |
+| `data[].created_at` | string | ISO 8601 timestamp when the model was added |
+| `data[].updated_at` | string | ISO 8601 timestamp when the model was last updated |
+| `pagination.page` | integer | Current page number |
+| `pagination.limit` | integer | Items per page |
+| `pagination.total` | integer | Total number of matching models |
+
+---
+
+## Get Model
+
+```
+GET /api/models/:id
+```
+
+Retrieve full details for a single model by its unique identifier.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The model's unique identifier (e.g. `gpt-5`, `deepseek-v3`) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/models/gpt-5"
+```
+
+### Example Response
+
+```json
+{
+  "id": "gpt-5",
+  "name": "GPT-5",
+  "description": "OpenAI's fifth-generation flagship model with significant improvements in reasoning, multimodal understanding, and code generation. Features enhanced instruction following and expanded context window.",
+  "capabilities": ["chat", "completion", "function-calling", "vision", "audio", "code-generation", "reasoning"],
+  "modalities": ["text", "image", "audio", "code"],
+  "context_window": 256000,
+  "licensing": "proprietary",
+  "created_at": "2025-06-01T00:00:00.000Z",
+  "updated_at": "2026-05-01T00:00:00.000Z"
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique model identifier (kebab-case) |
+| `name` | string | Human-readable display name |
+| `description` | string | Detailed description of the model |
+| `capabilities` | string[] | Supported capabilities |
+| `modalities` | string[] | Supported input/output modalities |
+| `context_window` | integer | Maximum context window size in tokens |
+| `licensing` | string | License type |
+| `created_at` | string | ISO 8601 timestamp when the model was added |
+| `updated_at` | string | ISO 8601 timestamp when the model was last updated |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `404` | `NOT_FOUND` | Model with the given ID does not exist |
+
+---
+
+## Get Model Providers
+
+```
+GET /api/models/:id/providers
+```
+
+List all providers that serve a given model, including pricing and availability details for each.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The model's unique identifier (e.g. `deepseek-v3`) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/models/deepseek-v3/providers"
+```
+
+### Example Response
+
+```json
+{
+  "model_id": "deepseek-v3",
+  "providers": [
+    {
+      "provider_id": "deepseek",
+      "provider_name": "DeepSeek",
+      "provider_model_name": "deepseek-chat",
+      "pricing": {
+        "input_per_million": 0.27,
+        "output_per_million": 1.10,
+        "currency": "USD",
+        "cache_read_per_million": 0.07
+      },
+      "rate_limits": {
+        "requests_per_minute": 500,
+        "tokens_per_minute": 500000
+      },
+      "context_window_override": null,
+      "available_regions": ["global"]
+    },
+    {
+      "provider_id": "together-ai",
+      "provider_name": "Together AI",
+      "provider_model_name": "deepseek-ai/DeepSeek-V3",
+      "pricing": {
+        "input_per_million": 0.50,
+        "output_per_million": 0.90,
+        "currency": "USD"
+      },
+      "rate_limits": {
+        "requests_per_minute": 600,
+        "tokens_per_minute": 1000000
+      },
+      "context_window_override": null,
+      "available_regions": ["us-east-1", "eu-west-1"]
+    }
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model_id` | string | The requested model's identifier |
+| `providers` | array | Array of provider mapping objects |
+| `providers[].provider_id` | string | Unique provider identifier |
+| `providers[].provider_name` | string | Human-readable provider name |
+| `providers[].provider_model_name` | string | The provider's internal model name (used in their API) |
+| `providers[].pricing.input_per_million` | number | Cost per 1M input tokens (USD) |
+| `providers[].pricing.output_per_million` | number | Cost per 1M output tokens (USD) |
+| `providers[].pricing.currency` | string | ISO 4217 currency code |
+| `providers[].pricing.cache_write_per_million` | number | Cost per 1M tokens written to cache (optional) |
+| `providers[].pricing.cache_read_per_million` | number | Cost per 1M tokens read from cache (optional) |
+| `providers[].rate_limits.requests_per_minute` | integer | Max requests per minute |
+| `providers[].rate_limits.tokens_per_minute` | integer | Max tokens per minute |
+| `providers[].context_window_override` | integer \| null | Provider-specific context window override, or `null` for model default |
+| `providers[].available_regions` | string[] | Regions where this model is available at this provider |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `404` | `NOT_FOUND` | Model with the given ID does not exist |
+
+---
+
+## Compare Providers
+
+```
+GET /api/models/:id/compare
+```
+
+Compare all providers serving a model side-by-side, with pricing and performance data to help you choose the best option.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The model's unique identifier (e.g. `gpt-5`) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/models/gpt-5/compare"
+```
+
+### Example Response
+
+```json
+{
+  "model_id": "gpt-5",
+  "model_name": "GPT-5",
+  "comparison": [
+    {
+      "provider_id": "openai",
+      "provider_name": "OpenAI",
+      "provider_model_name": "gpt-5",
+      "pricing": {
+        "input_per_million": 10.0,
+        "output_per_million": 40.0,
+        "currency": "USD",
+        "cache_write_per_million": 5.0,
+        "cache_read_per_million": 2.5
+      },
+      "rate_limits": {
+        "requests_per_minute": 500,
+        "tokens_per_minute": 500000
+      },
+      "context_window_override": null,
+      "available_regions": ["us-east-1", "eu-west-1"]
+    },
+    {
+      "provider_id": "openrouter",
+      "provider_name": "OpenRouter",
+      "provider_model_name": "openai/gpt-5",
+      "pricing": {
+        "input_per_million": 10.0,
+        "output_per_million": 40.0,
+        "currency": "USD"
+      },
+      "rate_limits": {
+        "requests_per_minute": 200,
+        "tokens_per_minute": 400000
+      },
+      "context_window_override": null,
+      "available_regions": ["global"]
+    }
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model_id` | string | The requested model's identifier |
+| `model_name` | string | Human-readable model name |
+| `comparison` | array | Array of provider comparison objects, sorted by input price (ascending) |
+| `comparison[].provider_id` | string | Unique provider identifier |
+| `comparison[].provider_name` | string | Human-readable provider name |
+| `comparison[].provider_model_name` | string | The provider's internal model name |
+| `comparison[].pricing.input_per_million` | number | Cost per 1M input tokens |
+| `comparison[].pricing.output_per_million` | number | Cost per 1M output tokens |
+| `comparison[].pricing.currency` | string | ISO 4217 currency code |
+| `comparison[].pricing.cache_write_per_million` | number | Cost per 1M cache write tokens (optional) |
+| `comparison[].pricing.cache_read_per_million` | number | Cost per 1M cache read tokens (optional) |
+| `comparison[].rate_limits.requests_per_minute` | integer | Max requests per minute |
+| `comparison[].rate_limits.tokens_per_minute` | integer | Max tokens per minute |
+| `comparison[].context_window_override` | integer \| null | Provider-specific context window override, or `null` for model default |
+| `comparison[].available_regions` | string[] | Regions where this model is available |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `404` | `NOT_FOUND` | Model with the given ID does not exist |

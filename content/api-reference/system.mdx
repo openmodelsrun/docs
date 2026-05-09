@@ -1,0 +1,93 @@
+---
+title: System API
+description: API reference for the system health check endpoint — used for monitoring, load balancers, and uptime checks to verify the status of the API and its dependencies.
+---
+
+# System API
+
+The System API provides operational health information about the OpenModels platform. Use it for monitoring, load balancer health checks, and uptime verification.
+
+## Health Check
+
+```
+GET /api/health
+```
+
+Returns the overall health status of the API and its dependencies, including database connectivity and cache availability. This endpoint is designed for automated monitoring systems, load balancers, and uptime services.
+
+### Parameters
+
+No parameters required.
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/health"
+```
+
+### Example Response
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-07-10T14:30:00.000Z",
+  "services": {
+    "api": {
+      "status": "healthy"
+    },
+    "database": {
+      "status": "healthy",
+      "latency_ms": 3
+    },
+    "cache": {
+      "status": "healthy",
+      "latency_ms": 1
+    }
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Overall system status: `healthy` or `degraded` |
+| `timestamp` | string | ISO 8601 timestamp of the health check |
+| `services` | object | Status of individual service dependencies |
+| `services.api` | object | API service status |
+| `services.api.status` | string | API status: `healthy` or `degraded` |
+| `services.database` | object | Database connection status |
+| `services.database.status` | string | Database status: `healthy` or `degraded` |
+| `services.database.latency_ms` | integer | Database ping latency in milliseconds |
+| `services.cache` | object | Cache layer status |
+| `services.cache.status` | string | Cache status: `healthy` or `degraded` |
+| `services.cache.latency_ms` | integer | Cache ping latency in milliseconds |
+
+### HTTP Status Codes
+
+| Status | Meaning | Description |
+|--------|---------|-------------|
+| `200` | Healthy | All services are operating normally |
+| `503` | Degraded | One or more services are unavailable or experiencing issues |
+
+When the system is degraded, the response body still returns with the same structure, but individual service statuses will reflect the issue:
+
+```json
+{
+  "status": "degraded",
+  "timestamp": "2025-07-10T14:30:00.000Z",
+  "services": {
+    "api": {
+      "status": "healthy"
+    },
+    "database": {
+      "status": "healthy",
+      "latency_ms": 5
+    },
+    "cache": {
+      "status": "degraded",
+      "latency_ms": null
+    }
+  }
+}
+```

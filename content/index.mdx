@@ -1,0 +1,61 @@
+---
+title: OpenModels Documentation
+description: The open-source registry and comparison platform for LLM models and inference providers. Discover, compare, and integrate AI models across multiple providers.
+---
+
+import { Cards } from 'nextra/components'
+
+# Welcome to OpenModels
+
+OpenModels is an open-source registry and comparison platform for LLM models and inference providers. It helps developers discover, compare, and integrate AI models across multiple providers with standardized data, real-time telemetry, and transparent pricing.
+
+## Key Features
+
+### Model Registry
+
+A community-maintained, schema-validated registry of 44+ LLM models from vendors including OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek, and more. Every model definition is machine-readable and version-controlled.
+
+### Provider Comparison
+
+Compare 19+ inference providers side-by-side — pricing, capabilities, context windows, and availability. Find the best provider for your use case with structured, up-to-date data.
+
+### Real-Time Telemetry
+
+Monitor provider health, latency, and reliability through live telemetry data. Make informed decisions about which providers to use based on actual performance metrics.
+
+### Open Source
+
+The entire registry is open source and community-driven. Contribute new models, providers, and mappings through pull requests with automated schema validation.
+
+## What You'll Find Here
+
+<Cards>
+  <Cards.Card title="Quickstart" href="/getting-started/quickstart">
+    Learn how to query the API, browse models, and compare providers.
+  </Cards.Card>
+  <Cards.Card title="Core Concepts" href="/getting-started/concepts">
+    Understand the registry structure — models, providers, and mappings.
+  </Cards.Card>
+  <Cards.Card title="Installation" href="/getting-started/installation">
+    Set up the platform locally for development.
+  </Cards.Card>
+  <Cards.Card title="Architecture" href="/architecture">
+    Understand how OpenModels components work together — data flow, schemas, and system design.
+  </Cards.Card>
+  <Cards.Card title="API Reference" href="/api-reference">
+    Complete reference for all API endpoints including models, providers, and telemetry.
+  </Cards.Card>
+  <Cards.Card title="Contributing" href="/contributing">
+    Add new models, providers, and mappings to the registry.
+  </Cards.Card>
+  <Cards.Card title="Roadmap" href="/roadmap">
+    See what's planned for future releases.
+  </Cards.Card>
+</Cards>
+
+## Quick Links
+
+- **Registry Repository** — [github.com/openmodels-run/openmodels](https://github.com/openmodels-run/openmodels)
+- **Current Coverage** — 44 models · 19 providers · 72 mappings
+- **Schema Definitions** — Standardized YAML schemas for models, providers, and pricing
+- **Automated Validation** — All contributions are validated against JSON schemas on every PR

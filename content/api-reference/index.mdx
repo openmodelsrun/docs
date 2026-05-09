@@ -1,0 +1,206 @@
+---
+title: API Reference Overview
+description: Complete reference for the OpenModels REST API — base URL, authentication, request/response format, pagination, error handling, and available endpoints.
+---
+
+# API Reference
+
+The OpenModels API provides programmatic access to the model registry, provider data, and real-time telemetry. All endpoints return JSON and follow consistent conventions for pagination and error handling.
+
+## Base URL
+
+All API requests use the following base URL:
+
+```
+https://api.openmodels.run
+```
+
+All endpoints are prefixed with `/api/`. For example, to list models:
+
+```
+https://api.openmodels.run/api/models
+```
+
+## Authentication
+
+The OpenModels API is **public and read-only**. No authentication, API keys, or tokens are required. You can start making requests immediately.
+
+```bash
+# No auth headers needed
+curl "https://api.openmodels.run/api/models"
+```
+
+## Request Format
+
+- **Protocol:** HTTPS only
+- **Methods:** `GET` (all endpoints are read-only)
+- **Content-Type:** Not required for GET requests
+- **Query parameters:** Used for filtering, searching, and pagination
+
+```bash
+curl "https://api.openmodels.run/api/models?search=deepseek&capability=reasoning&limit=10"
+```
+
+## Response Format
+
+All responses return JSON with a consistent structure. List endpoints wrap results in a `data` array with pagination metadata:
+
+```json
+{
+  "data": [
+    { "id": "deepseek-v3", "name": "DeepSeek V3", "..." : "..." }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 44
+  }
+}
+```
+
+Single-resource endpoints return the object directly:
+
+```json
+{
+  "id": "deepseek-v3",
+  "name": "DeepSeek V3",
+  "vendor": "deepseek",
+  "capabilities": ["chat", "reasoning", "code"],
+  "context_window": 128000,
+  "max_output_tokens": 8192
+}
+```
+
+## Pagination
+
+All list endpoints support pagination via query parameters:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `page` | integer | `1` | Page number (1-indexed) |
+| `limit` | integer | `20` | Items per page (max 100) |
+
+**Example request:**
+
+```bash
+curl "https://api.openmodels.run/api/models?page=2&limit=10"
+```
+
+**Pagination metadata in response:**
+
+```json
+{
+  "pagination": {
+    "page": 2,
+    "limit": 10,
+    "total": 44
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `page` | Current page number |
+| `limit` | Number of items per page |
+| `total` | Total number of items across all pages |
+
+To calculate total pages: `Math.ceil(total / limit)`.
+
+## Error Format
+
+When a request fails, the API returns a JSON error response with a consistent structure:
+
+```json
+{
+  "error": {
+    "status": 404,
+    "message": "Model not found",
+    "type": "NOT_FOUND"
+  }
+}
+```
+
+### Error Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `error.status` | integer | HTTP status code |
+| `error.message` | string | Human-readable error description |
+| `error.type` | string | Machine-readable error type identifier |
+
+### Common Error Types
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `400` | `BAD_REQUEST` | Invalid query parameters or malformed request |
+| `404` | `NOT_FOUND` | Requested resource does not exist |
+| `429` | `RATE_LIMITED` | Too many requests — slow down |
+| `500` | `INTERNAL_ERROR` | Unexpected server error |
+
+## Rate Limiting
+
+The API applies basic rate limiting to ensure fair usage:
+
+- **Limit:** 100 requests per minute per IP address
+- **Headers:** Rate limit status is returned in response headers
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum requests per window |
+| `X-RateLimit-Remaining` | Requests remaining in current window |
+| `X-RateLimit-Reset` | Unix timestamp when the window resets |
+
+When rate limited, the API returns a `429` status with an error response:
+
+```json
+{
+  "error": {
+    "status": 429,
+    "message": "Rate limit exceeded. Try again in 45 seconds.",
+    "type": "RATE_LIMITED"
+  }
+}
+```
+
+## Available Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | [`/api/models`](/api-reference/models#list-models) | List and search models |
+| `GET` | [`/api/models/:id`](/api-reference/models#get-model) | Get model details |
+| `GET` | [`/api/models/:id/providers`](/api-reference/models#get-model-providers) | List providers for a model |
+| `GET` | [`/api/models/:id/compare`](/api-reference/models#compare-providers) | Compare providers for a model |
+| `GET` | [`/api/providers`](/api-reference/providers#list-providers) | List all providers |
+| `GET` | [`/api/providers/:id`](/api-reference/providers#get-provider) | Get provider details |
+| `GET` | [`/api/telemetry/health/:provider_id`](/api-reference/telemetry#provider-health) | Provider health status |
+| `GET` | [`/api/telemetry/latency/:provider_id`](/api-reference/telemetry#provider-latency) | Provider latency metrics |
+| `GET` | [`/api/telemetry/ranked/:model_id`](/api-reference/telemetry#ranked-providers) | Ranked providers for a model |
+| `GET` | [`/api/health`](/api-reference/system) | System health check |
+
+## Quick Example
+
+Fetch the first 5 models with vision capability:
+
+```bash
+curl "https://api.openmodels.run/api/models?capability=vision&limit=5"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "vendor": "openai",
+      "capabilities": ["chat", "vision", "code", "reasoning"],
+      "context_window": 128000,
+      "max_output_tokens": 16384
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 5,
+    "total": 12
+  }
+}
+```

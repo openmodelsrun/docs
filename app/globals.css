@@ -1,0 +1,8 @@
+/* Logo colors — single logo, colored via currentColor per theme. */
+.om-logo {
+  color: #0e443d; /* dark teal for light mode */
+}
+
+html.dark .om-logo {
+  color: #efeeda; /* cream for dark mode */
+}

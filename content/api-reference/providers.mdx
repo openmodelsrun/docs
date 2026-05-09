@@ -1,0 +1,155 @@
+---
+title: Providers API
+description: API reference for listing and retrieving inference providers — includes endpoints for browsing providers with search/pagination and fetching full provider details.
+---
+
+# Providers API
+
+The Providers API lets you browse all inference providers in the OpenModels registry, search by name, and retrieve full details including API configuration, supported regions, and model counts.
+
+## List Providers
+
+```
+GET /api/providers
+```
+
+List all inference providers with optional search filtering and pagination.
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `search` | string | No | — | Full-text search across provider name and description |
+| `compatibility` | string | No | — | Filter by API compatibility (e.g. `openai`, `anthropic`) |
+| `region` | string | No | — | Filter by supported region (e.g. `us-east-1`, `eu-west-1`) |
+| `page` | integer | No | `1` | Page number (1-indexed) |
+| `limit` | integer | No | `20` | Items per page (max 100) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/providers?search=openai&limit=10"
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "description": "Leading AI research company providing API access to GPT-4, GPT-3.5, DALL-E, and other foundation models through a developer-friendly REST API with global availability.",
+      "api_base_url": "https://api.openai.com/v1",
+      "auth_type": "bearer",
+      "regions": ["us-east-1", "eu-west-1"],
+      "compatibility": "openai",
+      "models_count": 12,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "together-ai",
+      "name": "Together AI",
+      "description": "Cloud platform for running and fine-tuning open-source models with high throughput inference and competitive pricing across a wide range of LLMs.",
+      "api_base_url": "https://api.together.xyz/v1",
+      "auth_type": "bearer",
+      "regions": ["us-east-1", "eu-west-1"],
+      "compatibility": "openai",
+      "models_count": 8,
+      "created_at": "2024-02-01T00:00:00.000Z",
+      "updated_at": "2025-03-10T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data` | array | Array of provider objects |
+| `data[].id` | string | Unique provider identifier (kebab-case) |
+| `data[].name` | string | Human-readable display name |
+| `data[].description` | string | Detailed description of the provider |
+| `data[].api_base_url` | string | Base URL for the provider's API |
+| `data[].auth_type` | string | Authentication method (`bearer`, `api-key`, `header`) |
+| `data[].regions` | string[] | Supported deployment regions |
+| `data[].compatibility` | string | API compatibility layer (e.g. `openai`, `anthropic`) |
+| `data[].models_count` | integer | Number of models available through this provider |
+| `data[].created_at` | string | ISO 8601 timestamp when the provider was added |
+| `data[].updated_at` | string | ISO 8601 timestamp when the provider was last updated |
+| `pagination.page` | integer | Current page number |
+| `pagination.limit` | integer | Items per page |
+| `pagination.total` | integer | Total number of matching providers |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `400` | `BAD_REQUEST` | Invalid query parameters (e.g. `limit` exceeds 100) |
+
+---
+
+## Get Provider
+
+```
+GET /api/providers/:id
+```
+
+Retrieve full details for a single provider by its unique identifier.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The provider's unique identifier (e.g. `openai`, `anthropic`) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/providers/anthropic"
+```
+
+### Example Response
+
+```json
+{
+  "id": "anthropic",
+  "name": "Anthropic",
+  "description": "AI safety company providing API access to the Claude family of models, known for helpfulness, harmlessness, and honesty with strong reasoning and analysis capabilities.",
+  "api_base_url": "https://api.anthropic.com/v1",
+  "auth_type": "api-key",
+  "regions": ["us-east-1", "eu-west-1"],
+  "compatibility": "anthropic",
+  "models_count": 6,
+  "created_at": "2024-01-01T00:00:00.000Z",
+  "updated_at": "2024-06-15T00:00:00.000Z"
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique provider identifier (kebab-case) |
+| `name` | string | Human-readable display name |
+| `description` | string | Detailed description of the provider |
+| `api_base_url` | string | Base URL for the provider's API |
+| `auth_type` | string | Authentication method (`bearer`, `api-key`, `header`) |
+| `regions` | string[] | Supported deployment regions |
+| `compatibility` | string | API compatibility layer (e.g. `openai`, `anthropic`) |
+| `models_count` | integer | Number of models available through this provider |
+| `created_at` | string | ISO 8601 timestamp when the provider was added |
+| `updated_at` | string | ISO 8601 timestamp when the provider was last updated |
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `404` | `NOT_FOUND` | Provider with the given ID does not exist |

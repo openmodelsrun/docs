@@ -1,0 +1,121 @@
+---
+title: Version 1.0 Roadmap
+description: OpenModels v1.0 roadmap — milestones, progress, and planned features for the first stable release.
+---
+
+# Version 1.0 Roadmap
+
+This page tracks progress toward the OpenModels v1.0 release. Each section represents a milestone with individual tasks showing current status.
+
+**Target:** Q3 2026
+
+**Status Legend:**
+- **Done** — completed and shipped
+- **In Progress** — actively being worked on
+- **Planned** — scheduled, not yet started
+
+---
+
+## Phase 1: Registry Foundation — Done
+
+Establish the public registry as the canonical source of truth for models, providers, and mappings.
+
+- [x] Define JSON Schema for models, providers, and mappings
+- [x] Create validation script with schema, duplicate, and referential integrity checks
+- [x] Set up GitHub Actions CI for automated PR validation
+- [x] Populate initial model definitions (44 models across 12 families)
+- [x] Populate provider definitions (19 providers with verified endpoints)
+- [x] Add provider-model mappings with pricing data (72 mappings)
+- [x] Verify pricing against official provider documentation
+- [x] Support extended pricing dimensions (cache, image, audio, reasoning)
+
+**Status:** Done
+
+---
+
+## Phase 2: Platform API — In Progress
+
+Build the NestJS REST API for model discovery, comparison, and provider lookup.
+
+- [x] Project scaffolding with NestJS and TypeScript
+- [x] PostgreSQL database schema and migrations
+- [x] Registry ingestion pipeline (YAML → PostgreSQL)
+- [x] `GET /api/models` — list and search models
+- [x] `GET /api/models/:id` — model details
+- [x] `GET /api/models/:id/providers` — providers for a model
+- [x] `GET /api/models/:id/compare` — compare providers
+- [x] `GET /api/providers` — list providers
+- [x] `GET /api/providers/:id` — provider details
+- [x] `GET /api/health` — system health check
+- [ ] Redis caching layer with TTL-based invalidation
+- [ ] Pagination and filtering across all list endpoints
+- [ ] Rate limiting and request throttling
+- [ ] OpenAPI 3.1 spec generation with Swagger UI
+
+**Status:** In Progress
+
+---
+
+## Phase 3: Telemetry — Planned
+
+Real-time monitoring of provider health, latency, and availability.
+
+- [ ] Telemetry worker (Python + Celery) scaffolding
+- [ ] Health probe scheduler (5-minute intervals)
+- [ ] Latency probe scheduler (15-minute intervals)
+- [ ] Time-to-first-token measurement
+- [ ] Total response time measurement
+- [ ] `GET /api/telemetry/health/:provider_id` endpoint
+- [ ] `GET /api/telemetry/latency/:provider_id` endpoint
+- [ ] `GET /api/telemetry/ranked/:model_id` — ranked providers by performance
+- [ ] Historical telemetry data retention (30 days)
+- [ ] Alerting for provider outages
+
+**Status:** Planned
+
+---
+
+## Phase 4: Web Interface — Planned
+
+Next.js application for browsing, searching, and comparing models.
+
+- [ ] Project setup with Next.js 16 and App Router
+- [ ] Model search and browse page
+- [ ] Model detail page with provider list
+- [ ] Provider comparison view (pricing, latency, uptime)
+- [ ] Real-time telemetry dashboard
+- [ ] Dark/light mode theming
+- [ ] Responsive layout for mobile devices
+- [ ] SEO optimization (meta tags, sitemap, structured data)
+
+**Status:** Planned
+
+---
+
+## Phase 5: Documentation — In Progress
+
+Comprehensive documentation site for users and contributors.
+
+- [x] Nextra docs site setup with App Router
+- [x] Architecture documentation (overview, data flow, schemas)
+- [x] Contributing guides (adding models, adding providers)
+- [x] Roadmap page
+- [ ] Getting Started section (quickstart, concepts, installation)
+- [ ] API Reference section with endpoint documentation
+- [ ] SEO and sitemap configuration
+- [ ] Deployment to production
+
+**Status:** In Progress
+
+---
+
+## Release Criteria
+
+Before tagging v1.0, the following must be complete:
+
+- [ ] All Phase 1–5 tasks marked as done
+- [ ] API uptime > 99.5% over 30-day window
+- [ ] Documentation covers all public endpoints
+- [ ] Lighthouse scores > 90 (Performance, Accessibility, SEO)
+- [ ] Security audit passed (no critical or high findings)
+- [ ] Load testing confirms API handles 100 req/s sustained

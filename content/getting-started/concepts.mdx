@@ -1,0 +1,175 @@
+---
+title: Core Concepts
+description: Understand the OpenModels registry structure — models, providers, and mappings — and how they relate to each other.
+---
+
+# Core Concepts
+
+The OpenModels registry is built around three core entities: **models**, **providers**, and **mappings**. Together they form a vendor-neutral catalog that lets you compare AI models across inference services.
+
+```
+┌─────────┐         ┌───────────┐         ┌──────────┐
+│  Model  │◄────────│  Mapping  │────────►│ Provider │
+└─────────┘         └───────────┘         └──────────┘
+  (what)          (pricing, limits)         (where)
+```
+
+## Models
+
+A **model** is a canonical AI model definition — independent of where it's hosted. It describes what the model is and what it can do, without tying it to any specific provider.
+
+Each model has a unique `id` that serves as the primary key across the registry.
+
+```yaml filename="models/deepseek-v3.yaml"
+id: deepseek-v3
+name: DeepSeek V3
+description: DeepSeek's third-generation large language model featuring mixture-of-experts architecture.
+capabilities:
+  - chat
+  - completion
+  - function-calling
+  - code-generation
+  - reasoning
+modalities:
+  - text
+  - code
+context_window: 128000
+licensing: other
+created_at: "2024-12-01T00:00:00.000Z"
+updated_at: "2025-01-15T00:00:00.000Z"
+```
+
+### Key fields
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique identifier used to reference this model everywhere |
+| `capabilities` | What the model can do (chat, reasoning, vision, code-generation, etc.) |
+| `modalities` | Input/output types the model supports (text, image, code) |
+| `context_window` | Maximum number of input tokens the model accepts |
+| `licensing` | License type (open-source, other, proprietary) |
+
+## Providers
+
+A **provider** is an inference API service that hosts and serves models. Providers expose API endpoints where you can send requests and get completions back.
+
+```yaml filename="providers/deepinfra.yaml"
+id: deepinfra
+name: Deep Infra
+description: Serverless inference platform offering fast and cost-effective access to popular open-weight models.
+api_base_url: https://api.deepinfra.com/v1/openai
+auth_type: bearer
+regions:
+  - us-east-1
+  - eu-west-1
+compatibility: openai
+created_at: "2024-01-01T00:00:00.000Z"
+updated_at: "2026-05-01T00:00:00.000Z"
+```
+
+### Key fields
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique provider identifier |
+| `api_base_url` | The base URL for API requests |
+| `auth_type` | Authentication method (bearer, api-key, none) |
+| `regions` | Data center regions where the provider operates |
+| `compatibility` | API compatibility format (openai, anthropic, custom) |
+
+## Mappings
+
+A **mapping** connects a model to a provider. It captures the provider-specific details: what name the provider uses for the model, how much it costs, and what rate limits apply.
+
+Mappings live in subdirectories named after the provider: `mappings/{provider_id}/{model_id}.yaml`
+
+```yaml filename="mappings/deepinfra/llama-4-scout.yaml"
+model_id: llama-4-scout
+provider_id: deepinfra
+provider_model_name: meta-llama/Llama-4-Scout-17B-16E-Instruct
+pricing:
+  input_per_million: 0.06
+  output_per_million: 0.18
+  currency: USD
+rate_limits:
+  requests_per_minute: 600
+  tokens_per_minute: 1000000
+context_window_override: null
+available_regions:
+  - us-east-1
+  - eu-west-1
+created_at: "2025-04-05T00:00:00.000Z"
+updated_at: "2026-05-01T00:00:00.000Z"
+```
+
+### Key fields
+
+| Field | Description |
+|-------|-------------|
+| `model_id` | References the model's `id` |
+| `provider_id` | References the provider's `id` |
+| `provider_model_name` | The model identifier used in the provider's API |
+| `pricing` | Cost per million tokens (input and output) |
+| `rate_limits` | Requests and tokens per minute allowed |
+| `context_window_override` | Provider-specific context window limit (if different from the model default) |
+
+## How They Relate
+
+The three entities form a many-to-many relationship:
+
+- **A model can be served by multiple providers.** For example, Llama 4 Scout is available from Cerebras, DeepInfra, and Groq — each with different pricing and rate limits.
+- **A provider can serve multiple models.** DeepInfra offers DeepSeek R1, Llama 4 Scout, Gemma 4, and many others.
+- **Mappings are the glue.** Each mapping file captures the specific terms under which a provider offers a model.
+
+### Example: Llama 4 Scout across providers
+
+The same model, three different providers, three different price points:
+
+| Provider | Input (per 1M tokens) | Output (per 1M tokens) | RPM |
+|----------|----------------------|------------------------|-----|
+| DeepInfra | $0.06 | $0.18 | 600 |
+| Groq | $0.11 | $0.34 | 30 |
+| Cerebras | $0.60 | $0.60 | 30 |
+
+This is what makes the registry useful — you can compare the same model across providers and pick the best fit for your use case (cheapest, fastest, highest rate limits, specific region).
+
+## Registry Directory Structure
+
+The registry repository follows a flat, predictable layout:
+
+```
+openmodels/
+├── models/                    # One YAML file per canonical model
+│   ├── deepseek-v3.yaml
+│   ├── llama-4-scout.yaml
+│   ├── claude-sonnet-4-5.yaml
+│   └── gemini-2-5-pro.yaml
+├── providers/                 # One YAML file per inference provider
+│   ├── openai.yaml
+│   ├── anthropic.yaml
+│   ├── deepinfra.yaml
+│   └── groq.yaml
+└── mappings/                  # Grouped by provider
+    ├── anthropic/
+    │   ├── claude-sonnet-4-5.yaml
+    │   └── claude-haiku-4-5.yaml
+    ├── deepinfra/
+    │   ├── deepseek-v3.yaml
+    │   └── llama-4-scout.yaml
+    ├── groq/
+    │   └── llama-4-scout.yaml
+    └── cerebras/
+        └── llama-4-scout.yaml
+```
+
+**Naming conventions:**
+- Model files are named by their `id` (e.g., `deepseek-v3.yaml`)
+- Provider files are named by their `id` (e.g., `deepinfra.yaml`)
+- Mapping files are named by the `model_id` they reference, inside a folder named after the `provider_id`
+
+## Next Steps
+
+- [YAML Schemas](/architecture/schemas) — Full field reference for all three schemas with validation rules
+- [Adding a Model](/contributing/adding-model) — Step-by-step guide to contribute a new model
+- [Adding a Provider](/contributing/adding-provider) — How to add a new inference provider
+- [Quickstart](/getting-started/quickstart) — Query the API to search and compare models

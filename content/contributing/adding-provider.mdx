@@ -1,0 +1,201 @@
+---
+title: Adding a Provider
+description: Step-by-step guide for contributing a new inference provider to the OpenModels registry.
+---
+
+# Adding a Provider
+
+This guide walks you through contributing a new inference provider to the OpenModels registry. A provider represents an API service that hosts and serves AI models for inference.
+
+---
+
+## Prerequisites
+
+Before you begin:
+
+1. **Fork the repository** — Fork [openmodels-run/openmodels](https://github.com/openmodels-run/openmodels) and clone it locally.
+2. **Understand the schema** — Review the [YAML Schemas](/architecture/schemas) reference to familiarize yourself with the provider schema and valid field values.
+3. **Install Python 3.11+** — The validation script requires Python with dependencies from `requirements.txt`.
+
+```bash
+git clone https://github.com/<your-username>/openmodels.git
+cd openmodels
+pip install -r requirements.txt
+```
+
+---
+
+## Provider Requirements
+
+Before adding a provider, confirm it meets the following criteria:
+
+- **Public API** — The provider must offer a publicly accessible inference API (not invite-only or private beta)
+- **Documented pricing** — Pricing information must be publicly available and verifiable
+- **Authentication** — The provider must use a standard authentication mechanism (Bearer token, API key, etc.)
+- **Stable endpoint** — The API base URL must be stable and production-ready
+- **Model availability** — The provider must serve at least one model already listed in the OpenModels registry (or you can add the model simultaneously — see [Adding a Model](/contributing/adding-model))
+
+---
+
+## Step 1: Create the Provider YAML File
+
+Create a new file in the `providers/` directory. The filename must match the provider's `id` field.
+
+**File path:** `providers/<provider-id>.yaml`
+
+### Complete Example
+
+```yaml
+id: my-provider
+name: My Provider
+description: >-
+  A brief description of the provider's service, what makes it unique,
+  and what types of models it specializes in. Keep this to 2-3 sentences.
+api_base_url: https://api.my-provider.com/v1
+auth_type: bearer
+regions:
+  - us-east-1
+  - eu-west-1
+compatibility: openai
+created_at: "2025-06-01T00:00:00.000Z"
+updated_at: "2025-06-01T00:00:00.000Z"
+```
+
+### Field Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier. Must match the filename (without `.yaml`). Use lowercase kebab-case. |
+| `name` | string | Human-readable display name of the provider. |
+| `description` | string | Brief description of the provider's service and positioning (2-3 sentences). |
+| `api_base_url` | string | The base URL for the provider's inference API. |
+| `auth_type` | string | Authentication method: `bearer`, `api-key`, or `oauth`. |
+| `regions` | string[] | AWS-style region codes where the provider operates (e.g., `us-east-1`, `eu-west-1`). |
+| `compatibility` | string | API compatibility layer: `openai`, `anthropic`, or the provider's own format. |
+| `created_at` | ISO 8601 | When the provider was first added to the registry. |
+| `updated_at` | ISO 8601 | Set to the same value as `created_at` for new entries. |
+
+---
+
+## Step 2: Create Model Mappings
+
+After adding the provider, create mapping files for each model the provider serves. Mappings live in `mappings/<provider_id>/`.
+
+**File path:** `mappings/<provider-id>/<model-id>.yaml`
+
+### Example Mapping
+
+```yaml
+model_id: llama-4-scout
+provider_id: my-provider
+provider_model_name: meta-llama/Llama-4-Scout-17B-16E
+pricing:
+  input_per_million: 0.20
+  output_per_million: 0.60
+  currency: USD
+rate_limits:
+  requests_per_minute: 300
+  tokens_per_minute: 500000
+context_window_override: null
+available_regions:
+  - us-east-1
+  - eu-west-1
+created_at: "2025-06-01T00:00:00.000Z"
+updated_at: "2025-06-01T00:00:00.000Z"
+```
+
+Each model the provider serves needs its own mapping file. For full details on mapping fields, see [Adding a Model — Step 2](/contributing/adding-model#step-2-create-the-mapping-yaml-file).
+
+### Directory Structure
+
+```
+mappings/
+└── my-provider/
+    ├── llama-4-scout.yaml
+    ├── deepseek-v3.yaml
+    └── mistral-medium-3-5.yaml
+```
+
+---
+
+## Step 3: Validate Locally
+
+Run the validation script to check your files before submitting a pull request:
+
+```bash
+python validate_registry.py
+```
+
+The validator checks:
+
+- **YAML syntax** — Files must be valid, parseable YAML
+- **Required fields** — All required fields are present in the provider file
+- **Type checking** — Field values match expected types (strings, arrays, dates)
+- **Referential integrity** — Mapping files reference valid `provider_id` and `model_id` values
+- **Naming conventions** — Filenames match their `id` field
+- **URL format** — `api_base_url` is a valid HTTPS URL
+
+Fix any errors reported by the script before proceeding.
+
+---
+
+## Step 4: Submit a Pull Request
+
+1. **Create a branch** with a descriptive name:
+   ```bash
+   git checkout -b add-provider/my-provider
+   ```
+
+2. **Commit your changes** with a clear message:
+   ```bash
+   git add providers/my-provider.yaml mappings/my-provider/
+   git commit -m "feat: add my-provider with model mappings"
+   ```
+
+3. **Push and open a PR** against the `main` branch.
+
+### What Reviewers Look For
+
+- All validation checks pass (automated via GitHub Actions)
+- The provider meets the requirements listed above (public API, documented pricing, etc.)
+- The `api_base_url` is correct and points to the production endpoint
+- The `auth_type` accurately reflects the provider's authentication mechanism
+- The `compatibility` field correctly identifies the API format
+- Regions are accurate and use standard region codes
+- At least one model mapping is included with accurate pricing
+- Pricing data is sourced from official provider documentation
+
+---
+
+## Tips
+
+### Naming Conventions
+
+- Use lowercase kebab-case for provider IDs: `my-provider`, not `MyProvider` or `my_provider`
+- Keep IDs short but recognizable: `deepinfra`, `together-ai`, `google-ai-studio`
+- For providers with sub-products, use a descriptive suffix: `cloudflare-workers-ai`
+
+### Compatibility Values
+
+| Value | Description |
+|-------|-------------|
+| `openai` | Provider uses an OpenAI-compatible API (most common for open-weight model hosts) |
+| `anthropic` | Provider uses the Anthropic Messages API format |
+| Provider-specific | Use the provider's name if they have a unique API format (e.g., `cohere`, `google`) |
+
+### Common Mistakes
+
+- **Mismatched filename and `id`** — The filename (without `.yaml`) must exactly match the `id` field
+- **Trailing slashes in `api_base_url`** — Do not include a trailing slash in the base URL
+- **Invalid timestamps** — Use full ISO 8601 format with timezone: `"2025-06-01T00:00:00.000Z"`
+- **Missing mapping directory** — Create the `mappings/<provider-id>/` directory with at least one mapping file
+- **Incorrect `compatibility`** — Verify the API format by checking the provider's documentation
+
+### Existing Providers for Reference
+
+Browse the `providers/` directory for real-world examples:
+
+- `providers/deepinfra.yaml` — OpenAI-compatible serverless platform
+- `providers/anthropic.yaml` — Proprietary API format
+- `providers/google.yaml` — Google-specific API format
+- `providers/openrouter.yaml` — OpenAI-compatible aggregator
