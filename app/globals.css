@@ -1,3 +1,9 @@
+/* Override Nextra primary accent to emerald green */
+:root {
+  --nextra-primary-hue: 160deg;
+  --nextra-primary-saturation: 84%;
+}
+
 /* Logo colors — single logo, colored via currentColor per theme. */
 .om-logo {
   color: #0e443d; /* dark teal for light mode */
