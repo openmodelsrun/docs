@@ -25,7 +25,7 @@ const navbar = (
   <Navbar
     logo={<Logo />}
     logoLink="https://www.openmodels.run"
-    projectLink="https://github.com/openmodels-run/openmodels"
+    projectLink="https://github.com/openmodelsrun/openmodels"
   />
 )
 
@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <Layout
           navbar={navbar}
           pageMap={pageMap}
-          docsRepositoryBase="https://github.com/openmodels-run/docs/tree/main"
+          docsRepositoryBase="https://github.com/openmodelsrun/docs/tree/main"
           footer={footer}
           sidebar={{ defaultMenuCollapseLevel: 1, toggleButton: true }}
           toc={{ float: true, title: 'On This Page' }}
