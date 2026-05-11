@@ -22,6 +22,7 @@ Search and list models in the registry with optional filtering and pagination.
 | `search` | string | No | — | Full-text search across model name and description |
 | `capability` | string | No | — | Filter by capability (e.g. `reasoning`, `vision`, `code-generation`) |
 | `modality` | string | No | — | Filter by modality (e.g. `text`, `image`, `audio`) |
+| `sort` | string | No | `recency` | Sort order: `name` (A-Z), `recency` (newest first), `context_window` (largest first), `providers` (most first) |
 | `page` | integer | No | `1` | Page number (1-indexed) |
 | `limit` | integer | No | `20` | Items per page (max 100) |
 
@@ -325,3 +326,65 @@ curl "https://api.openmodels.run/api/models/gpt-5/compare"
 | Status | Type | Description |
 |--------|------|-------------|
 | `404` | `NOT_FOUND` | Model with the given ID does not exist |
+
+
+---
+
+## Popular Models
+
+```
+GET /api/models/popular
+```
+
+Returns models ranked by a relevance score combining recency and provider availability. Useful for homepage "Popular Models" sections.
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `limit` | integer | No | `12` | Number of models to return (8–12 recommended) |
+
+### Scoring Algorithm
+
+The relevance score is calculated as:
+
+```
+score = 0.7 × recency_factor + 0.3 × provider_factor
+```
+
+- **recency_factor**: 1.0 for models created within 6 months, linear decay to 0.0 at 24 months
+- **provider_factor**: model's mapping count / max mapping count across all models
+
+Models with `updated_at` older than 24 months AND zero provider mappings are excluded.
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/models/popular?limit=8"
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "deepseek-v4",
+    "name": "DeepSeek V4",
+    "description": "DeepSeek's fourth-generation model with enhanced reasoning.",
+    "capabilities": ["chat", "completion", "reasoning", "code-generation"],
+    "modalities": ["text", "code"],
+    "context_window": 128000,
+    "licensing": "other",
+    "created_at": "2026-03-01T00:00:00.000Z",
+    "updated_at": "2026-05-01T00:00:00.000Z"
+  }
+]
+```
+
+### Response
+
+Returns an array of model objects (same schema as individual model responses), sorted by relevance score descending.
+
+### Caching
+
+Results are cached with a 5-minute TTL. New models appear in the ranking within 1 hour of ingestion.

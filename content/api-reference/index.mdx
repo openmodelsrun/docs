@@ -170,12 +170,16 @@ When rate limited, the API returns a `429` status with an error response:
 | `GET` | [`/api/models/:id`](/api-reference/models#get-model) | Get model details |
 | `GET` | [`/api/models/:id/providers`](/api-reference/models#get-model-providers) | List providers for a model |
 | `GET` | [`/api/models/:id/compare`](/api-reference/models#compare-providers) | Compare providers for a model |
+| `GET` | [`/api/models/popular`](/api-reference/models#popular-models) | Popular models ranked by relevance |
 | `GET` | [`/api/providers`](/api-reference/providers#list-providers) | List all providers |
 | `GET` | [`/api/providers/:id`](/api-reference/providers#get-provider) | Get provider details |
+| `GET` | [`/api/stats`](/api-reference/system#platform-stats) | Platform statistics (counts + last sync) |
+| `GET` | [`/api/search`](/api-reference/system#search) | Unified search across models and providers |
+| `GET` | [`/api/search/index`](/api-reference/system#search-index) | Lightweight search index for client-side use |
 | `GET` | [`/api/telemetry/health/:provider_id`](/api-reference/telemetry#provider-health) | Provider health status |
 | `GET` | [`/api/telemetry/latency/:provider_id`](/api-reference/telemetry#provider-latency) | Provider latency metrics |
 | `GET` | [`/api/telemetry/ranked/:model_id`](/api-reference/telemetry#ranked-providers) | Ranked providers for a model |
-| `GET` | [`/api/health`](/api-reference/system) | System health check |
+| `GET` | [`/api/health`](/api-reference/system#health-check) | System health check |
 
 ## Quick Example
 

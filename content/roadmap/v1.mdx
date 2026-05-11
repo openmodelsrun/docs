@@ -23,9 +23,9 @@ Establish the public registry as the canonical source of truth for models, provi
 - [x] Define JSON Schema for models, providers, and mappings
 - [x] Create validation script with schema, duplicate, and referential integrity checks
 - [x] Set up GitHub Actions CI for automated PR validation
-- [x] Populate initial model definitions (44 models across 12 families)
-- [x] Populate provider definitions (19 providers with verified endpoints)
-- [x] Add provider-model mappings with pricing data (72 mappings)
+- [x] Populate initial model definitions (50+ models across 15+ families)
+- [x] Populate provider definitions (26+ providers with verified endpoints)
+- [x] Add provider-model mappings with pricing data (100+ mappings)
 - [x] Verify pricing against official provider documentation
 - [x] Support extended pricing dimensions (cache, image, audio, reasoning)
 
@@ -33,66 +33,78 @@ Establish the public registry as the canonical source of truth for models, provi
 
 ---
 
-## Phase 2: Platform API — In Progress
+## Phase 2: Platform API — Done
 
 Build the NestJS REST API for model discovery, comparison, and provider lookup.
 
-- [x] Project scaffolding with NestJS and TypeScript
+- [x] Project scaffolding with NestJS 11 and TypeScript 5.9
 - [x] PostgreSQL database schema and migrations
 - [x] Registry ingestion pipeline (YAML → PostgreSQL)
-- [x] `GET /api/models` — list and search models
+- [x] `GET /api/models` — list and search models with sort options
 - [x] `GET /api/models/:id` — model details
 - [x] `GET /api/models/:id/providers` — providers for a model
 - [x] `GET /api/models/:id/compare` — compare providers
+- [x] `GET /api/models/popular` — relevance-ranked popular models
 - [x] `GET /api/providers` — list providers
 - [x] `GET /api/providers/:id` — provider details
+- [x] `GET /api/stats` — platform statistics (counts + last sync)
+- [x] `GET /api/search` — unified full-text search
+- [x] `GET /api/search/index` — lightweight client-side search index
 - [x] `GET /api/health` — system health check
-- [ ] Redis caching layer with TTL-based invalidation
-- [ ] Pagination and filtering across all list endpoints
+- [x] Redis caching layer with TTL-based invalidation
+- [x] Pagination and filtering across all list endpoints
 - [ ] Rate limiting and request throttling
 - [ ] OpenAPI 3.1 spec generation with Swagger UI
 
-**Status:** In Progress
+**Status:** Done (rate limiting and OpenAPI docs planned for v1.0)
 
 ---
 
-## Phase 3: Telemetry — Planned
+## Phase 3: Telemetry — Done
 
 Real-time monitoring of provider health, latency, and availability.
 
-- [ ] Telemetry worker (Python + Celery) scaffolding
-- [ ] Health probe scheduler (5-minute intervals)
-- [ ] Latency probe scheduler (15-minute intervals)
-- [ ] Time-to-first-token measurement
-- [ ] Total response time measurement
-- [ ] `GET /api/telemetry/health/:provider_id` endpoint
-- [ ] `GET /api/telemetry/latency/:provider_id` endpoint
-- [ ] `GET /api/telemetry/ranked/:model_id` — ranked providers by performance
-- [ ] Historical telemetry data retention (30 days)
+- [x] Telemetry worker (Python + Celery) scaffolding
+- [x] Health probe scheduler (5-minute intervals)
+- [x] Latency probe scheduler (15-minute intervals)
+- [x] Time-to-first-token measurement
+- [x] Total response time measurement
+- [x] `GET /api/telemetry/health/:provider_id` endpoint
+- [x] `GET /api/telemetry/latency/:provider_id` endpoint
+- [x] `GET /api/telemetry/ranked/:model_id` — ranked providers by performance
+- [x] Historical telemetry data retention (30 days)
+- [x] "Unknown" status for providers with no/stale health data
+- [x] Health probe accepts 401/403 as reachable (no false negatives)
 - [ ] Alerting for provider outages
 
-**Status:** Planned
+**Status:** Done (alerting planned for v1.0)
 
 ---
 
-## Phase 4: Web Interface — Planned
+## Phase 4: Web Interface — Done
 
-Next.js application for browsing, searching, and comparing models.
+Next.js 16 application for browsing, searching, and comparing models.
 
-- [ ] Project setup with Next.js 16 and App Router
-- [ ] Model search and browse page
-- [ ] Model detail page with provider list
-- [ ] Provider comparison view (pricing, latency, uptime)
-- [ ] Real-time telemetry dashboard
-- [ ] Dark/light mode theming
-- [ ] Responsive layout for mobile devices
+- [x] Project setup with Next.js 16 and App Router
+- [x] Model search and browse page with sort options
+- [x] Model detail page with provider list and error handling
+- [x] Provider comparison view (pricing, latency, uptime)
+- [x] Command Palette (`Cmd+K` / `Ctrl+K`) for instant global search
+- [x] Popular Models section with relevance scoring
+- [x] Provider logo system with SVG assets and letter fallback
+- [x] Provider Marquee (auto-scrolling logo strip)
+- [x] Ecosystem Graph (interactive node visualization)
+- [x] Recently Added section with relative timestamps
+- [x] Category-based navigation (capability, modality, license)
+- [x] Dark/light mode theming
+- [x] Responsive layout for mobile devices
 - [ ] SEO optimization (meta tags, sitemap, structured data)
 
-**Status:** Planned
+**Status:** Done (SEO optimization planned for v1.0)
 
 ---
 
-## Phase 5: Documentation — In Progress
+## Phase 5: Documentation — Done
 
 Comprehensive documentation site for users and contributors.
 
@@ -100,12 +112,30 @@ Comprehensive documentation site for users and contributors.
 - [x] Architecture documentation (overview, data flow, schemas)
 - [x] Contributing guides (adding models, adding providers)
 - [x] Roadmap page
-- [ ] Getting Started section (quickstart, concepts, installation)
-- [ ] API Reference section with endpoint documentation
-- [ ] SEO and sitemap configuration
+- [x] Getting Started section (quickstart, concepts, installation)
+- [x] API Reference section with endpoint documentation
+- [x] SEO and sitemap configuration
+- [x] Green accent theme with warm light-mode background
 - [ ] Deployment to production
 
-**Status:** In Progress
+**Status:** Done (deployment pending)
+
+---
+
+## Phase 6: Production Hardening — Planned
+
+Final polish and production readiness for v1.0.
+
+- [ ] API rate limiting (100 req/min per IP)
+- [ ] OpenAPI 3.1 spec auto-generation with Swagger UI
+- [ ] Provider outage alerting (webhook + email)
+- [ ] SEO optimization (structured data, meta tags, sitemap)
+- [ ] Lighthouse scores > 90 (Performance, Accessibility, SEO)
+- [ ] Security audit (no critical or high findings)
+- [ ] Load testing (100 req/s sustained)
+- [ ] Production deployment with zero-downtime updates
+
+**Status:** Planned
 
 ---
 
@@ -113,7 +143,7 @@ Comprehensive documentation site for users and contributors.
 
 Before tagging v1.0, the following must be complete:
 
-- [ ] All Phase 1–5 tasks marked as done
+- [ ] All Phase 1–6 tasks marked as done
 - [ ] API uptime > 99.5% over 30-day window
 - [ ] Documentation covers all public endpoints
 - [ ] Lighthouse scores > 90 (Performance, Accessibility, SEO)

@@ -1,11 +1,165 @@
 ---
-title: System API
-description: API reference for the system health check endpoint — used for monitoring, load balancers, and uptime checks to verify the status of the API and its dependencies.
+title: System & Search API
+description: API reference for system health, platform statistics, and unified search — includes health check, stats, and search endpoints.
 ---
 
-# System API
+# System & Search API
 
-The System API provides operational health information about the OpenModels platform. Use it for monitoring, load balancer health checks, and uptime verification.
+The System API provides operational health information, platform-wide statistics, and unified search across the OpenModels registry.
+
+## Platform Stats
+
+```
+GET /api/stats
+```
+
+Returns current counts of models, providers, and mappings in the registry, along with the timestamp of the last successful data sync.
+
+### Parameters
+
+No parameters required.
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/stats"
+```
+
+### Example Response
+
+```json
+{
+  "models": 52,
+  "providers": 28,
+  "mappings": 108,
+  "last_sync_at": "2026-05-11T10:30:00.000Z"
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `models` | integer | Total number of models in the registry |
+| `providers` | integer | Total number of providers in the registry |
+| `mappings` | integer | Total number of provider-model mappings |
+| `last_sync_at` | string \| null | ISO 8601 timestamp of last successful ingestion, or `null` if no sync has completed |
+
+### Caching
+
+Results are cached with a 60-second TTL. Cache is invalidated after each ingestion cycle.
+
+---
+
+## Search
+
+```
+GET /api/search
+```
+
+Unified full-text search across models and providers using PostgreSQL `ts_rank`. Results are grouped by type and ranked by relevance.
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `q` | string | Yes | — | Search query (minimum 1 character) |
+| `type` | string | No | — | Filter by type: `models` or `providers`. Omit for both. |
+| `limit` | integer | No | `10` | Maximum results per type (max 20) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/search?q=deepseek&limit=5"
+```
+
+### Example Response
+
+```json
+{
+  "models": [
+    {
+      "id": "deepseek-v4",
+      "name": "DeepSeek V4",
+      "type": "model",
+      "description": "DeepSeek's fourth-generation large language model."
+    },
+    {
+      "id": "deepseek-v3",
+      "name": "DeepSeek V3",
+      "type": "model",
+      "description": "DeepSeek's third-generation model with MoE architecture."
+    }
+  ],
+  "providers": [
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "type": "provider",
+      "description": "Official DeepSeek inference API."
+    }
+  ],
+  "total": 3
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `models` | array | Matching model results, sorted by relevance |
+| `providers` | array | Matching provider results, sorted by relevance |
+| `total` | integer | Total number of results across both types |
+| `*.id` | string | Entity identifier |
+| `*.name` | string | Display name |
+| `*.type` | string | Entity type: `model` or `provider` |
+| `*.description` | string | Brief description |
+
+### Ranking
+
+Results are ranked by relevance: exact matches first, then prefix matches, then substring matches.
+
+---
+
+## Search Index
+
+```
+GET /api/search/index
+```
+
+Returns a lightweight JSON payload of all model and provider names/IDs for client-side filtering. Designed for the Command Palette (`Cmd+K`) to enable instant local search without server round-trips.
+
+### Parameters
+
+No parameters required.
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/search/index"
+```
+
+### Example Response
+
+```json
+{
+  "models": [
+    { "id": "deepseek-v4", "name": "DeepSeek V4", "capabilities": ["chat", "reasoning"], "modalities": ["text", "code"] },
+    { "id": "gpt-5", "name": "GPT-5", "capabilities": ["chat", "vision", "reasoning"], "modalities": ["text", "image"] }
+  ],
+  "providers": [
+    { "id": "openai", "name": "OpenAI", "compatibility": "openai" },
+    { "id": "anthropic", "name": "Anthropic", "compatibility": "anthropic" }
+  ],
+  "updated_at": "2026-05-11T10:30:00.000Z"
+}
+```
+
+### Caching
+
+Results are cached with a 5-minute TTL. Payload is typically under 50KB for the full registry.
+
+---
 
 ## Health Check
 

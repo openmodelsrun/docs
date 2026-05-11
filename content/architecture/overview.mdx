@@ -114,8 +114,12 @@ A NestJS REST API providing model/provider discovery and telemetry endpoints:
 | GET | `/api/models/{id}` | Get model details |
 | GET | `/api/models/{id}/providers` | List providers for a model |
 | GET | `/api/models/{id}/compare` | Compare providers for a model |
+| GET | `/api/models/popular` | Popular models ranked by relevance |
 | GET | `/api/providers` | List all providers |
 | GET | `/api/providers/{id}` | Get provider details |
+| GET | `/api/stats` | Platform statistics (counts + last sync) |
+| GET | `/api/search` | Unified search across models and providers |
+| GET | `/api/search/index` | Lightweight search index for client-side use |
 | GET | `/api/telemetry/health/{provider_id}` | Provider health status |
 | GET | `/api/telemetry/latency/{provider_id}` | Provider latency metrics |
 | GET | `/api/telemetry/ranked/{model_id}` | Ranked providers by performance |
@@ -133,9 +137,13 @@ A Python Celery worker that monitors provider health and latency:
 
 A Next.js 16 application providing a user-facing interface for:
 
-- Searching and browsing models
+- Searching and browsing models with sort options (name, recency, context window, provider count)
 - Comparing providers side-by-side (pricing, latency, uptime)
 - Viewing real-time telemetry dashboards
+- Command Palette (`Cmd+K` / `Ctrl+K`) for instant global search
+- Popular models section with relevance-based ranking
+- Interactive ecosystem visualization (node graph)
+- Provider logo marquee and category-based navigation
 
 ### 7. Caching Layer
 

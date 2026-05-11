@@ -4,6 +4,15 @@
   --nextra-primary-saturation: 84%;
 }
 
+/* Light theme: warm smoky background instead of white */
+html:not(.dark) {
+  --nextra-bg: 248, 247, 244;
+}
+
+html:not(.dark) body {
+  background-color: #f8f7f4;
+}
+
 /* Logo colors — single logo, colored via currentColor per theme. */
 .om-logo {
   color: #0e443d; /* dark teal for light mode */
