@@ -1,9 +1,3 @@
-/* Override Nextra primary accent to emerald green */
-:root {
-  --nextra-primary-hue: 160;
-  --nextra-primary-saturation: 84%;
-}
-
 /* Light theme: warm smoky background instead of white */
 html:not(.dark) {
   --nextra-bg: 248, 247, 244;

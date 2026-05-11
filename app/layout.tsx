@@ -35,7 +35,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const pageMap = await getPageMap()
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <Head>
+      <Head
+        color={{
+          hue: 160,
+          saturation: 84,
+          lightness: 40
+        }}
+      >
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <body>
