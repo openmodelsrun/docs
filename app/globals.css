@@ -1,6 +1,6 @@
 /* Override Nextra primary accent to emerald green */
 :root {
-  --nextra-primary-hue: 160deg;
+  --nextra-primary-hue: 160;
   --nextra-primary-saturation: 84%;
 }
 
