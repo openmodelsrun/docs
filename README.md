@@ -1,6 +1,6 @@
 # OpenModels Docs
 
-Documentation site for [OpenModels](https://github.com/openmodels-run/openmodels) — built with [Nextra](https://nextra.site) on Next.js 16.
+Documentation site for [OpenModels](https://github.com/openmodelsrun/openmodels) — built with [Nextra](https://nextra.site) on Next.js 16.
 
 **Version:** 0.6.0
 
