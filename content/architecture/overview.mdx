@@ -1,14 +1,14 @@
 ---
 title: System Architecture Overview
-description: Learn how OpenModels components work together — registry, platform services, data layer, and telemetry.
+description: Learn how OpenModels works — registry structure, validation pipeline, API, and telemetry.
 ---
 
 # System Architecture Overview
 
-OpenModels is a hybrid infrastructure layer for discovering, validating, and comparing LLM models and inference providers. The system follows a **registry-first, model-centric architecture** where:
+OpenModels is built around a **registry-first, model-centric architecture** where:
 
 - **Open Registry** — YAML files in a public GitHub repository serve as the single source of truth for models, providers, and mappings
-- **Proprietary Platform** — Internal services provide telemetry, analytics, search, and a web interface
+- **Public API** — A REST API at `api.openmodels.run` provides model discovery, comparison, and telemetry data
 - **Model-Centric Design** — Users search for canonical models (e.g., `deepseek-v3`, `qwen3-coder`) and discover which providers offer them
 
 ## High-Level Architecture
@@ -21,16 +21,10 @@ graph TB
         Validation[GitHub Actions<br/>Validation Pipeline]
     end
 
-    subgraph "Platform Services"
-        Ingestion[Ingestion Script<br/>Python]
-        API[Platform API<br/>NestJS]
-        Worker[Telemetry Worker<br/>Python]
-        Web[Web Interface<br/>Next.js 16]
-    end
-
-    subgraph "Data Layer"
-        PG[(PostgreSQL<br/>Registry + Telemetry)]
-        Redis[(Redis<br/>Cache)]
+    subgraph "OpenModels Services"
+        API[REST API<br/>api.openmodels.run]
+        Telemetry[Telemetry<br/>Health & Latency Probes]
+        Web[Web Interface<br/>openmodels.run]
     end
 
     subgraph "External"
@@ -38,13 +32,10 @@ graph TB
     end
 
     YAML -->|PR| Validation
-    Validation -->|Merge| Ingestion
-    Ingestion -->|Write| PG
-    API -->|Read/Write| PG
-    API -->|Cache| Redis
-    Worker -->|Probe| Providers
-    Worker -->|Write| PG
-    Web -->|HTTP| API
+    Validation -->|Merge| API
+    API -->|Serve| Web
+    Telemetry -->|Probe| Providers
+    Telemetry -->|Feed| API
 ```
 
 ## Key Design Principles
@@ -53,28 +44,14 @@ graph TB
 |-----------|-------------|
 | **Registry as Source of Truth** | All model, provider, and mapping data originates from validated YAML files |
 | **Validation-First** | Automated validation prevents invalid data from entering the system |
-| **Performance Through Caching** | Redis caching reduces database load and improves response times |
-| **Observability** | Comprehensive telemetry tracks provider health, latency, and availability |
+| **Observability** | Telemetry tracks provider health, latency, and availability |
 | **Developer Experience** | Clear APIs, interactive documentation, and intuitive web interface |
-
-## Technology Stack
-
-| Component | Technology | Justification |
-|-----------|-----------|---------------|
-| **Registry** | YAML + JSON Schema | Human-readable, version-controlled, schema-validated |
-| **Validation** | GitHub Actions + Python | Automated CI/CD, native GitHub integration |
-| **Platform API** | NestJS (TypeScript) | Type-safe, modular, excellent OpenAPI support |
-| **Web Interface** | Next.js 16 (React) | SSR/SSG for SEO, App Router, modern DX |
-| **Telemetry Worker** | Python + Celery | Async task execution, robust scheduling |
-| **Database** | PostgreSQL 15+ | JSONB support, full-text search, reliability |
-| **Cache** | Redis 7+ | High-performance caching, pub/sub for invalidation |
-| **API Documentation** | OpenAPI 3.1 + Swagger UI | Interactive docs, code generation support |
 
 ## System Components
 
 ### 1. Public Registry
 
-The registry is a public GitHub repository containing YAML definitions for all models, providers, and mappings. It serves as the canonical source of truth for the entire platform.
+The registry is a public GitHub repository containing YAML definitions for all models, providers, and mappings. It serves as the canonical source of truth.
 
 ```
 openmodels/
@@ -96,17 +73,9 @@ A GitHub Actions workflow that runs on every pull request to the registry:
 3. **Referential Integrity** — Ensures mappings reference existing models and providers
 4. **Duplicate Detection** — Prevents duplicate model or provider IDs
 
-### 3. Ingestion Script
+### 3. REST API
 
-A Python script triggered on merge to main that loads registry data into PostgreSQL:
-
-- Uses upsert logic (`INSERT ... ON CONFLICT UPDATE`) for idempotent operations
-- Maintains transaction boundaries for data consistency
-- Invalidates affected Redis cache keys after updates
-
-### 4. Platform API
-
-A NestJS REST API providing model/provider discovery and telemetry endpoints:
+The public API at `api.openmodels.run` provides model/provider discovery and telemetry endpoints:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -117,7 +86,7 @@ A NestJS REST API providing model/provider discovery and telemetry endpoints:
 | GET | `/api/models/popular` | Popular models ranked by relevance |
 | GET | `/api/providers` | List all providers |
 | GET | `/api/providers/{id}` | Get provider details |
-| GET | `/api/stats` | Platform statistics (counts + last sync) |
+| GET | `/api/stats` | Registry statistics (counts + last sync) |
 | GET | `/api/search` | Unified search across models and providers |
 | GET | `/api/search/index` | Lightweight search index for client-side use |
 | GET | `/api/telemetry/health/{provider_id}` | Provider health status |
@@ -125,17 +94,17 @@ A NestJS REST API providing model/provider discovery and telemetry endpoints:
 | GET | `/api/telemetry/ranked/{model_id}` | Ranked providers by performance |
 | GET | `/api/health` | System health check |
 
-### 5. Telemetry Worker
+### 4. Telemetry
 
-A Python Celery worker that monitors provider health and latency:
+Automated monitoring of provider health and latency:
 
 - **Health probes** — Every 5 minutes, checks provider API availability
 - **Latency probes** — Every 15 minutes, measures time-to-first-token and total response time
-- Results are stored in PostgreSQL and exposed via the Platform API
+- Results are exposed via the API's telemetry endpoints
 
-### 6. Web Interface
+### 5. Web Interface
 
-A Next.js 16 application providing a user-facing interface for:
+The web interface at [openmodels.run](https://openmodels.run) provides:
 
 - Searching and browsing models with sort options (name, recency, context window, provider count)
 - Comparing providers side-by-side (pricing, latency, uptime)
@@ -143,26 +112,15 @@ A Next.js 16 application providing a user-facing interface for:
 - Command Palette (`Cmd+K` / `Ctrl+K`) for instant global search
 - Popular models section with relevance-based ranking
 - Interactive ecosystem visualization (node graph)
-- Provider logo marquee and category-based navigation
-
-### 7. Caching Layer
-
-Redis provides high-performance caching with key-based invalidation:
-
-- **Model/Provider queries** — 5 minute TTL
-- **Telemetry data** — 1 minute TTL
-- **Pattern-based invalidation** — When data changes, affected cache keys are cleared
 
 ## System Boundaries
 
 ### In Scope
 
 - Registry management (YAML files, schemas, validation)
-- Data ingestion pipeline (YAML → PostgreSQL)
 - REST API for model/provider discovery and comparison
 - Telemetry collection (health probes, latency monitoring)
 - Web interface for browsing and comparing models
-- Caching layer for performance optimization
 
 ### Out of Scope
 

@@ -1,13 +1,13 @@
 ---
 title: System & Search API
-description: API reference for system health, platform statistics, and unified search — includes health check, stats, and search endpoints.
+description: API reference for system health, registry statistics, and unified search — includes health check, stats, and search endpoints.
 ---
 
 # System & Search API
 
-The System API provides operational health information, platform-wide statistics, and unified search across the OpenModels registry.
+The System API provides operational health information, registry-wide statistics, and unified search across the OpenModels registry.
 
-## Platform Stats
+## Registry Stats
 
 ```
 GET /api/stats
@@ -57,7 +57,7 @@ Results are cached with a 60-second TTL. Cache is invalidated after each ingesti
 GET /api/search
 ```
 
-Unified full-text search across models and providers using PostgreSQL `ts_rank`. Results are grouped by type and ranked by relevance.
+Unified full-text search across models and providers. Results are grouped by type and ranked by relevance.
 
 ### Query Parameters
 

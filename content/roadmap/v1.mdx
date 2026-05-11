@@ -33,13 +33,10 @@ Establish the public registry as the canonical source of truth for models, provi
 
 ---
 
-## Phase 2: Platform API — Done
+## Phase 2: API — Done
 
-Build the NestJS REST API for model discovery, comparison, and provider lookup.
+Build the REST API for model discovery, comparison, and provider lookup.
 
-- [x] Project scaffolding with NestJS 11 and TypeScript 5.9
-- [x] PostgreSQL database schema and migrations
-- [x] Registry ingestion pipeline (YAML → PostgreSQL)
 - [x] `GET /api/models` — list and search models with sort options
 - [x] `GET /api/models/:id` — model details
 - [x] `GET /api/models/:id/providers` — providers for a model
@@ -47,11 +44,11 @@ Build the NestJS REST API for model discovery, comparison, and provider lookup.
 - [x] `GET /api/models/popular` — relevance-ranked popular models
 - [x] `GET /api/providers` — list providers
 - [x] `GET /api/providers/:id` — provider details
-- [x] `GET /api/stats` — platform statistics (counts + last sync)
+- [x] `GET /api/stats` — registry statistics (counts + last sync)
 - [x] `GET /api/search` — unified full-text search
 - [x] `GET /api/search/index` — lightweight client-side search index
 - [x] `GET /api/health` — system health check
-- [x] Redis caching layer with TTL-based invalidation
+- [x] Caching layer with TTL-based invalidation
 - [x] Pagination and filtering across all list endpoints
 - [ ] Rate limiting and request throttling
 - [ ] OpenAPI 3.1 spec generation with Swagger UI
@@ -64,7 +61,6 @@ Build the NestJS REST API for model discovery, comparison, and provider lookup.
 
 Real-time monitoring of provider health, latency, and availability.
 
-- [x] Telemetry worker (Python + Celery) scaffolding
 - [x] Health probe scheduler (5-minute intervals)
 - [x] Latency probe scheduler (15-minute intervals)
 - [x] Time-to-first-token measurement
@@ -83,9 +79,8 @@ Real-time monitoring of provider health, latency, and availability.
 
 ## Phase 4: Web Interface — Done
 
-Next.js 16 application for browsing, searching, and comparing models.
+Web application for browsing, searching, and comparing models at [openmodels.run](https://openmodels.run).
 
-- [x] Project setup with Next.js 16 and App Router
 - [x] Model search and browse page with sort options
 - [x] Model detail page with provider list and error handling
 - [x] Provider comparison view (pricing, latency, uptime)
@@ -108,14 +103,13 @@ Next.js 16 application for browsing, searching, and comparing models.
 
 Comprehensive documentation site for users and contributors.
 
-- [x] Nextra docs site setup with App Router
+- [x] Docs site setup with Nextra
 - [x] Architecture documentation (overview, data flow, schemas)
 - [x] Contributing guides (adding models, adding providers)
 - [x] Roadmap page
 - [x] Getting Started section (quickstart, concepts, installation)
 - [x] API Reference section with endpoint documentation
 - [x] SEO and sitemap configuration
-- [x] Green accent theme with warm light-mode background
 - [ ] Deployment to production
 
 **Status:** Done (deployment pending)

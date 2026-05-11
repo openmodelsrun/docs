@@ -5,7 +5,7 @@ description: Sequence diagrams and detailed flows for registry contributions, mo
 
 # Data Flow
 
-This page describes the primary data flows in OpenModels — how data moves from community contributions through validation and ingestion into the platform, how users discover models via the API, and how telemetry is collected from providers.
+This page describes the primary data flows in OpenModels — how data moves from community contributions through validation into the registry, how users discover models via the API, and how telemetry is collected from providers.
 
 ## Registry Contribution Flow
 
@@ -17,9 +17,6 @@ sequenceDiagram
     participant GitHub
     participant Actions as GitHub Actions
     participant Reviewer
-    participant Ingestion as Ingestion Script
-    participant DB as PostgreSQL
-    participant Cache as Redis
 
     Contributor->>GitHub: Open Pull Request
     GitHub->>Actions: Trigger validate-registry workflow
@@ -32,10 +29,7 @@ sequenceDiagram
         Actions->>GitHub: Post success comment on PR
     end
     Reviewer->>GitHub: Approve and merge PR
-    GitHub->>Actions: Trigger ingest-registry workflow (push to main)
-    Actions->>Ingestion: Run ingestion script
-    Ingestion->>DB: Upsert models, providers, mappings
-    Ingestion->>Cache: Invalidate affected cache keys
+    Note over GitHub: Data available for API ingestion
 ```
 
 ### Validation Steps
@@ -49,18 +43,6 @@ The validation pipeline performs the following checks on every pull request:
 | 3 | Referential integrity | Rejects mappings referencing non-existent models or providers |
 | 4 | Duplicate detection | Rejects duplicate model or provider IDs |
 
-### Ingestion Details
-
-The ingestion script runs on every push to `main` that modifies `models/`, `providers/`, or `mappings/` directories:
-
-| Aspect | Detail |
-|--------|--------|
-| **Trigger** | Push to `main` branch (filtered by path) |
-| **Runtime** | Python 3.11 on GitHub Actions |
-| **Strategy** | Upsert (`INSERT ... ON CONFLICT UPDATE`) for idempotency |
-| **Transaction** | Atomic — all changes succeed or all roll back |
-| **Cache invalidation** | Pattern-based Redis key deletion after successful write |
-
 ## Model Discovery Flow
 
 When a user searches for models or retrieves model details through the API:
@@ -68,103 +50,71 @@ When a user searches for models or retrieves model details through the API:
 ```mermaid
 sequenceDiagram
     participant User
-    participant Web as Web Interface
-    participant API as Platform API (NestJS)
-    participant Cache as Redis
-    participant DB as PostgreSQL
+    participant API as OpenModels API
 
-    User->>Web: Search for "deepseek-v3"
-    Web->>API: GET /api/models?search=deepseek-v3
-    API->>Cache: Check cache for query
-    alt Cache hit
-        Cache-->>API: Return cached result
-    else Cache miss
-        API->>DB: Query models with full-text search
-        DB-->>API: Return matching models
-        API->>Cache: Store result (TTL: 5 min)
-    end
-    API-->>Web: JSON response with models
-    Web-->>User: Display model cards
+    User->>API: GET /api/models?search=deepseek-v3
+    API-->>User: JSON response with matching models
 
-    User->>Web: Click model for details
-    Web->>API: GET /api/models/{id}/providers
-    API->>Cache: Check cache
-    alt Cache hit
-        Cache-->>API: Return cached providers
-    else Cache miss
-        API->>DB: Query providers + pricing for model
-        DB-->>API: Return provider list
-        API->>Cache: Store result (TTL: 5 min)
-    end
-    API-->>Web: JSON response with providers
-    Web-->>User: Display provider comparison table
+    User->>API: GET /api/models/deepseek-v3/providers
+    API-->>User: JSON response with providers and pricing
 ```
 
-### API Response Caching
+### API Endpoints
 
-| Endpoint Pattern | Cache TTL | Invalidation Trigger |
-|-----------------|-----------|---------------------|
-| `/api/models` | 5 minutes | Registry ingestion |
-| `/api/models/{id}` | 5 minutes | Registry ingestion |
-| `/api/models/{id}/providers` | 5 minutes | Registry ingestion |
-| `/api/models/popular` | 5 minutes | Registry ingestion |
-| `/api/providers` | 5 minutes | Registry ingestion |
-| `/api/stats` | 60 seconds | Registry ingestion |
-| `/api/search/index` | 5 minutes | Registry ingestion |
-| `/api/telemetry/*` | 1 minute | New telemetry data |
+| Endpoint Pattern | Description |
+|-----------------|-------------|
+| `/api/models` | List and search models with filtering |
+| `/api/models/{id}` | Get full model details |
+| `/api/models/{id}/providers` | List providers for a model with pricing |
+| `/api/models/{id}/compare` | Compare providers side-by-side |
+| `/api/models/popular` | Popular models ranked by relevance |
+| `/api/providers` | List all providers |
+| `/api/search` | Unified search across models and providers |
+| `/api/telemetry/*` | Provider health and latency data |
 
 ## Telemetry Collection Flow
 
-The telemetry worker continuously monitors provider health and latency:
+The telemetry system continuously monitors provider health and latency:
 
 ```mermaid
 sequenceDiagram
-    participant Scheduler as Celery Beat
-    participant Worker as Telemetry Worker
+    participant Telemetry as Telemetry System
     participant Provider as LLM Provider API
-    participant DB as PostgreSQL
-    participant API as Platform API
+    participant API as OpenModels API
     participant User
 
     loop Every 5 minutes
-        Scheduler->>Worker: Trigger health probe task
-        Worker->>Provider: Send health check request
+        Telemetry->>Provider: Send health check request
         alt Provider responds
-            Provider-->>Worker: 200 OK (healthy)
-            Worker->>DB: Write health record (status: up)
+            Provider-->>Telemetry: 200 OK (healthy)
+            Note over Telemetry: Record status: up
         else Provider timeout/error
-            Provider-->>Worker: Timeout or error
-            Worker->>DB: Write health record (status: down)
+            Provider-->>Telemetry: Timeout or error
+            Note over Telemetry: Record status: down
         end
     end
 
     loop Every 15 minutes
-        Scheduler->>Worker: Trigger latency probe task
-        Worker->>Provider: Send inference request (small prompt)
-        Provider-->>Worker: Stream response
-        Worker->>Worker: Measure TTFT + total time
-        Worker->>DB: Write latency record
+        Telemetry->>Provider: Send inference request (small prompt)
+        Provider-->>Telemetry: Stream response
+        Note over Telemetry: Measure TTFT + total time
     end
 
     User->>API: GET /api/telemetry/health/{provider_id}
-    API->>DB: Query latest health records
-    DB-->>API: Return health history
     API-->>User: JSON response with health status
 
     User->>API: GET /api/telemetry/ranked/{model_id}
-    API->>DB: Query providers ranked by latency + uptime
-    DB-->>API: Return ranked list
     API-->>User: JSON response with ranked providers
 ```
 
 ### Telemetry Metrics
 
-| Metric | Collection Interval | Storage | Retention |
-|--------|-------------------|---------|-----------|
-| **Health status** | Every 5 minutes | PostgreSQL | 30 days |
-| **Time to first token (TTFT)** | Every 15 minutes | PostgreSQL | 30 days |
-| **Total response time** | Every 15 minutes | PostgreSQL | 30 days |
-| **Availability (uptime %)** | Computed from health records | Derived | Rolling 7 days |
+| Metric | Collection Interval | Retention |
+|--------|-------------------|-----------|
+| **Health status** | Every 5 minutes | 30 days |
+| **Time to first token (TTFT)** | Every 15 minutes | 30 days |
+| **Total response time** | Every 15 minutes | 30 days |
+| **Availability (uptime %)** | Computed from health records | Rolling 7 days |
 
 ### Provider Ranking Algorithm
 
@@ -186,24 +136,21 @@ sequenceDiagram
     participant Contributor
     participant Registry as GitHub Registry
     participant Pipeline as CI/CD Pipeline
-    participant DB as PostgreSQL
-    participant Worker as Telemetry Worker
+    participant API as OpenModels API
+    participant Telemetry as Telemetry System
     participant Providers as LLM Providers
-    participant API as Platform API
     participant User
 
     Note over Contributor,User: Phase 1: Data Entry
     Contributor->>Registry: Submit YAML via PR
     Registry->>Pipeline: Validate and merge
-    Pipeline->>DB: Ingest registry data
 
     Note over Contributor,User: Phase 2: Enrichment
-    Worker->>Providers: Probe health and latency
-    Worker->>DB: Store telemetry metrics
+    Telemetry->>Providers: Probe health and latency
+    Telemetry->>API: Feed telemetry metrics
 
     Note over Contributor,User: Phase 3: Consumption
     User->>API: Query models/providers
-    API->>DB: Fetch registry + telemetry data
     API-->>User: Unified response (model + providers + metrics)
 ```
 

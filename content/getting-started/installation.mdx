@@ -1,11 +1,11 @@
 ---
 title: Local Installation
-description: Set up the OpenModels platform locally for development — prerequisites, infrastructure, and dev servers.
+description: Set up the OpenModels registry and documentation site locally for development and contributions.
 ---
 
 # Local Installation
 
-This guide walks you through running the full OpenModels platform on your local machine for development. The platform consists of a NestJS API, a Next.js web interface, PostgreSQL, Redis, and a Python-based telemetry worker.
+This guide walks you through setting up the OpenModels registry and documentation site on your local machine for development and contributions.
 
 ## Prerequisites
 
@@ -13,119 +13,35 @@ Make sure you have the following installed:
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| **Node.js** | 22+ | API and web interface |
-| **pnpm** | 10+ | Package manager (monorepo workspaces) |
-| **Python** | 3.11+ | Ingestion scripts and telemetry worker |
-| **Docker & Docker Compose** | Latest | PostgreSQL and Redis infrastructure |
+| **Python** | 3.11+ | Registry validation script |
+| **Node.js** | 22+ | Documentation site |
 | **Git** | 2.30+ | Clone repositories |
 
 Verify your setup:
 
 ```bash
-node --version    # v22.x or higher
-pnpm --version   # 10.x or higher
 python3 --version # 3.11 or higher
-docker --version  # 24.x or higher
+node --version    # v22.x or higher
 git --version     # 2.30 or higher
 ```
 
 ## Clone the Repository
 
-Clone the public registry:
-
 ```bash
-# Create a workspace directory
-mkdir openmodels-dev && cd openmodels-dev
-
-# Clone the public registry (models, providers, mappings)
 git clone https://github.com/openmodelsrun/openmodels.git
+cd openmodels
 ```
 
-## Start Infrastructure
+## Set Up the Registry
 
-The platform requires PostgreSQL and Redis. Use Docker Compose to spin them up:
+Install Python dependencies and run the validation script to verify everything works:
 
 ```bash
-cd platform/infra
-docker compose up -d postgres redis
+pip install -r requirements.txt
+python validate_registry.py
 ```
 
-This starts:
-- **PostgreSQL 15** on port `5432`
-- **Redis 7** on port `6379`
-
-Verify the services are running:
-
-```bash
-docker compose ps
-```
-
-You should see both containers in a healthy state.
-
-## Environment Variables
-
-Copy the example environment file and configure it:
-
-```bash
-cp .env.example .env
-```
-
-Key variables to set:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/openmodels` | PostgreSQL connection string |
-| `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
-| `PORT` | `3000` | API server port |
-| `NODE_ENV` | `development` | Environment mode |
-
-The defaults work out of the box with the Docker Compose setup.
-
-## Run the API
-
-The NestJS API serves the model registry data and telemetry endpoints:
-
-```bash
-cd platform
-
-# Install dependencies
-pnpm install
-
-# Start the API in development mode
-pnpm dev --filter=@openmodels/api
-```
-
-The API will be available at `http://localhost:3001`. Verify it's running:
-
-```bash
-curl http://localhost:3001/api/health
-```
-
-Expected response:
-
-```json
-{ "status": "ok" }
-```
-
-## Run the Web Interface
-
-The Next.js web interface provides model browsing, provider comparison, and telemetry dashboards:
-
-```bash
-cd platform
-
-# Start the web dev server
-pnpm dev --filter=@openmodels/web
-```
-
-The web interface will be available at `http://localhost:3000`.
-
-Alternatively, start both API and Web together:
-
-```bash
-cd platform
-pnpm dev
-```
+If validation passes with no errors, the registry is set up correctly. You can now add or edit models, providers, and mappings.
 
 ## Run the Docs Site
 
@@ -143,112 +59,77 @@ npm run dev
 
 The docs site will be available at `http://localhost:3040`.
 
-## Run the Telemetry Worker (Optional)
+## Registry Directory Structure
 
-The Python telemetry worker probes provider health and latency. It's optional for most development work:
-
-```bash
-cd platform/workers
-
-# Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the Celery worker
-celery -A src.worker worker --loglevel=info
-
-# In another terminal, start the beat scheduler
-celery -A src.worker beat --loglevel=info
+```
+openmodels/
+├── models/              # One YAML file per canonical model
+├── providers/           # One YAML file per inference provider
+├── mappings/            # Provider-model mappings, organized by provider
+│   ├── anthropic/
+│   ├── openai/
+│   └── ...
+├── schemas/             # JSON Schema definitions for validation
+├── validate_registry.py # Validation script
+├── requirements.txt     # Python dependencies
+└── VERSION              # Current registry version
 ```
 
-## Summary of Ports
+## Common Tasks
 
-| Service | Port | URL |
-|---------|------|-----|
-| Platform API | 3001 | `http://localhost:3001` |
-| Web Interface | 3000 | `http://localhost:3000` |
-| Docs Site | 3040 | `http://localhost:3040` |
-| PostgreSQL | 5432 | — |
-| Redis | 6379 | — |
+### Validate after making changes
+
+After editing or adding YAML files, always run validation:
+
+```bash
+python validate_registry.py
+```
+
+### Build the docs site
+
+To generate a static export of the documentation:
+
+```bash
+cd docs
+npm run build
+```
+
+The output will be in the `docs/out/` directory.
 
 ## Troubleshooting
 
-### Port conflicts
+### Python validation fails
 
-If a port is already in use, you'll see an `EADDRINUSE` error. Either stop the conflicting process or change the port:
+If the validation script errors out:
 
 ```bash
-# Find what's using a port
-lsof -i :3000
+# Ensure you have the right Python version
+python3 --version
 
-# Kill the process
-kill -9 <PID>
+# Reinstall dependencies
+pip install -r requirements.txt --force-reinstall
 ```
 
-For the docs site, you can change the port in `docs/package.json` or pass it directly:
+### npm install fails
+
+If you encounter dependency resolution issues with the docs site:
+
+```bash
+cd docs
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Docs dev server port conflict
+
+If port 3040 is already in use:
 
 ```bash
 npm run dev -- -p 3041
 ```
 
-### Database connection refused
-
-If the API can't connect to PostgreSQL:
-
-1. Check Docker is running: `docker compose ps`
-2. Verify the container is healthy: `docker compose logs postgres`
-3. Ensure `DATABASE_URL` in `.env` matches the Docker Compose config
-4. Try restarting: `docker compose down && docker compose up -d`
-
-### Redis connection issues
-
-Similar to PostgreSQL — verify the Redis container is running:
-
-```bash
-docker compose logs redis
-redis-cli ping  # Should return PONG
-```
-
-### npm install fails
-
-If you encounter dependency resolution issues:
-
-```bash
-# Clear the cache and retry
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Python virtual environment issues
-
-If the telemetry worker fails to start:
-
-```bash
-# Recreate the virtual environment
-rm -rf venv
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### Migrations fail
-
-If database migrations error out, the database might be in an inconsistent state:
-
-```bash
-# Reset the database (destroys all data)
-docker compose down -v
-docker compose up -d
-
-# Re-run migrations
-npm run migration:run
-```
-
 ## Next Steps
 
 - [Quickstart](/getting-started/quickstart) — Query the API to search and compare models
-- [Architecture Overview](/architecture/overview) — Understand how the platform components fit together
 - [Adding a Model](/contributing/adding-model) — Contribute a new model to the registry
+- [Adding a Provider](/contributing/adding-provider) — Add a new inference provider
