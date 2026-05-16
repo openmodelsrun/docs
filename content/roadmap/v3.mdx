@@ -1,0 +1,91 @@
+---
+title: Version 3.0 Roadmap
+description: OpenModels v3.0 roadmap — personalization, auth profiles, and community-driven features.
+---
+
+# Version 3.0 Roadmap
+
+Version 3.0 introduces personalization and community features, transforming OpenModels from a reference tool into a personalized AI infrastructure.
+
+**Status Legend:**
+- **Done** — completed and shipped
+- **In Progress** — actively being worked on
+- **Planned** — scheduled, not yet started
+
+---
+
+## Phase 1: Auth Profiles — Planned
+
+User accounts and personalized experiences.
+
+- [ ] User authentication (OAuth 2.0 — GitHub, Google)
+- [ ] User profile with display name, avatar, and preferences
+- [ ] API key management (personal access tokens)
+- [ ] Saved model collections (favorites / watchlists)
+- [ ] Custom provider rankings based on personal priorities
+- [ ] Usage history and recently viewed models
+- [ ] Email notifications for provider status changes on watched models
+- [ ] Team accounts with shared collections and API keys
+
+**Status:** Planned
+
+---
+
+## Phase 2: Cost Calculator — Planned
+
+Interactive pricing estimation for real-world workloads.
+
+- [ ] Token usage estimator (input/output split)
+- [ ] Monthly cost projection by provider
+- [ ] Side-by-side cost comparison across providers for same model
+- [ ] Batch vs real-time pricing breakdown
+- [ ] Cost alerts and budget thresholds (for authenticated users)
+- [ ] Historical pricing trends and price change notifications
+- [ ] Export cost reports as CSV/PDF
+
+**Status:** Planned
+
+---
+
+## Phase 3: Community Contributions — Planned
+
+Enable the community to directly contribute and curate registry data.
+
+- [ ] Web-based model/provider submission form
+- [ ] Community review and voting on submissions
+- [ ] Contributor profiles with submission history
+- [ ] Automated validation of submitted YAML via web UI
+- [ ] Changelog feed showing recent registry updates
+- [ ] Discussion threads on model and provider pages
+- [ ] "Report issue" flow for incorrect pricing or metadata
+
+**Status:** Planned
+
+---
+
+## Phase 4: Webhooks & Integrations — Planned
+
+Event-driven notifications and third-party integrations.
+
+- [ ] Webhook subscriptions for registry events (new model, price change, outage)
+- [ ] Slack integration for team notifications
+- [ ] Discord bot for model lookups and alerts
+- [ ] GitHub Action for checking model availability in CI
+- [ ] Zapier/Make integration for workflow automation
+- [ ] Provider status page embeddable widget
+
+**Status:** Planned
+
+---
+
+## Release Criteria
+
+Before tagging v3.0:
+
+- [ ] Auth system with OAuth login and API key management
+- [ ] Cost calculator accurate within 5% of actual provider billing
+- [ ] Community submission flow end-to-end functional
+- [ ] Playground supports at least 5 major providers
+- [ ] Webhook delivery reliability > 99%
+- [ ] Load testing confirms platform handles 500 req/s sustained
+- [ ] Security audit passed for auth and payment-adjacent features

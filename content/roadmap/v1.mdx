@@ -7,7 +7,7 @@ description: OpenModels v1.0 roadmap — milestones, progress, and planned featu
 
 This page tracks progress toward the OpenModels v1.0 release. Each section represents a milestone with individual tasks showing current status.
 
-**Target:** Q3 2026
+**Status:** Released
 
 **Status Legend:**
 - **Done** — completed and shipped
@@ -50,10 +50,10 @@ Build the REST API for model discovery, comparison, and provider lookup.
 - [x] `GET /api/health` — system health check
 - [x] Caching layer with TTL-based invalidation
 - [x] Pagination and filtering across all list endpoints
-- [ ] Rate limiting and request throttling
-- [ ] OpenAPI 3.1 spec generation with Swagger UI
+- [x] Rate limiting and request throttling
+- [x] OpenAPI 3.1 spec generation with Swagger UI
 
-**Status:** Done (rate limiting and OpenAPI docs planned for v1.0)
+**Status:** Done
 
 ---
 
@@ -71,9 +71,9 @@ Real-time monitoring of provider health, latency, and availability.
 - [x] Historical telemetry data retention (30 days)
 - [x] "Unknown" status for providers with no/stale health data
 - [x] Health probe accepts 401/403 as reachable (no false negatives)
-- [ ] Alerting for provider outages
+- [x] Alerting for provider outages
 
-**Status:** Done (alerting planned for v1.0)
+**Status:** Done
 
 ---
 
@@ -93,9 +93,9 @@ Web application for browsing, searching, and comparing models at [openmodels.run
 - [x] Category-based navigation (capability, modality, license)
 - [x] Dark/light mode theming
 - [x] Responsive layout for mobile devices
-- [ ] SEO optimization (meta tags, sitemap, structured data)
+- [x] SEO optimization (meta tags, sitemap, structured data)
 
-**Status:** Done (SEO optimization planned for v1.0)
+**Status:** Done
 
 ---
 
@@ -110,36 +110,34 @@ Comprehensive documentation site for users and contributors.
 - [x] Getting Started section (quickstart, concepts, installation)
 - [x] API Reference section with endpoint documentation
 - [x] SEO and sitemap configuration
-- [ ] Deployment to production
+- [x] Deployment to production
 
-**Status:** Done (deployment pending)
+**Status:** Done
 
 ---
 
-## Phase 6: Production Hardening — Planned
+## Phase 6: Production Hardening — Done
 
 Final polish and production readiness for v1.0.
 
-- [ ] API rate limiting (100 req/min per IP)
-- [ ] OpenAPI 3.1 spec auto-generation with Swagger UI
-- [ ] Provider outage alerting (webhook + email)
-- [ ] SEO optimization (structured data, meta tags, sitemap)
-- [ ] Lighthouse scores > 90 (Performance, Accessibility, SEO)
-- [ ] Security audit (no critical or high findings)
-- [ ] Load testing (100 req/s sustained)
-- [ ] Production deployment with zero-downtime updates
+- [x] API rate limiting (100 req/min per IP)
+- [x] OpenAPI 3.1 spec auto-generation with Swagger UI
+- [x] Provider outage alerting (webhook + email)
+- [x] SEO optimization (structured data, meta tags, sitemap)
+- [x] Lighthouse scores > 90 (Performance, Accessibility, SEO)
+- [x] Security audit (no critical or high findings)
+- [x] Load testing (100 req/s sustained)
+- [x] Production deployment with zero-downtime updates
 
-**Status:** Planned
+**Status:** Done
 
 ---
 
-## Release Criteria
+## Release Criteria — Met ✓
 
-Before tagging v1.0, the following must be complete:
-
-- [ ] All Phase 1–6 tasks marked as done
-- [ ] API uptime > 99.5% over 30-day window
-- [ ] Documentation covers all public endpoints
-- [ ] Lighthouse scores > 90 (Performance, Accessibility, SEO)
-- [ ] Security audit passed (no critical or high findings)
-- [ ] Load testing confirms API handles 100 req/s sustained
+- [x] All Phase 1–6 tasks marked as done
+- [x] API uptime > 99.5% over 30-day window
+- [x] Documentation covers all public endpoints
+- [x] Lighthouse scores > 90 (Performance, Accessibility, SEO)
+- [x] Security audit passed (no critical or high findings)
+- [x] Load testing confirms API handles 100 req/s sustained

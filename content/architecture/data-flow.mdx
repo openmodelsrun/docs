@@ -79,25 +79,33 @@ The telemetry system continuously monitors provider health and latency:
 ```mermaid
 sequenceDiagram
     participant Telemetry as Telemetry System
+    participant Policy as Probe Policy
     participant Provider as LLM Provider API
     participant API as OpenModels API
     participant User
 
     loop Every 5 minutes
-        Telemetry->>Provider: Send health check request
-        alt Provider responds
-            Provider-->>Telemetry: 200 OK (healthy)
-            Note over Telemetry: Record status: up
-        else Provider timeout/error
-            Provider-->>Telemetry: Timeout or error
-            Note over Telemetry: Record status: down
+        Telemetry->>Policy: Check if provider enabled
+        alt Provider enabled
+            Telemetry->>Provider: Send health check request
+            alt Provider responds (200/401/403)
+                Provider-->>Telemetry: Response received
+                Note over Telemetry: Record status: up
+            else Provider timeout/error
+                Provider-->>Telemetry: Timeout or error
+                Note over Telemetry: Record status: down
+            end
         end
     end
 
     loop Every 15 minutes
-        Telemetry->>Provider: Send inference request (small prompt)
-        Provider-->>Telemetry: Stream response
-        Note over Telemetry: Measure TTFT + total time
+        Telemetry->>Policy: Check daily limit
+        alt Under limit
+            Telemetry->>Provider: Send authenticated inference request (streaming)
+            Provider-->>Telemetry: Stream response chunks
+            Note over Telemetry: Measure TTFT + total time<br/>Validate semantic response
+            Telemetry->>Policy: Increment daily probe count
+        end
     end
 
     User->>API: GET /api/telemetry/health/{provider_id}
@@ -115,6 +123,17 @@ sequenceDiagram
 | **Time to first token (TTFT)** | Every 15 minutes | 30 days |
 | **Total response time** | Every 15 minutes | 30 days |
 | **Availability (uptime %)** | Computed from health records | Rolling 7 days |
+| **Probe region** | Recorded per measurement | 30 days |
+
+### Probe Policies
+
+Each provider can have a custom probe policy controlling:
+
+- **Enabled/disabled** — Whether probes run for this provider
+- **Interval** — Custom probe frequency (default: 15 minutes for latency, 5 minutes for health)
+- **Daily limit** — Maximum probes per day to control costs (default: 96)
+
+Policies are tracked in Redis with daily counters that auto-expire after 24 hours.
 
 ### Provider Ranking Algorithm
 

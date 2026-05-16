@@ -98,9 +98,11 @@ The public API at `api.openmodels.run` provides model/provider discovery and tel
 
 Automated monitoring of provider health and latency:
 
-- **Health probes** — Every 5 minutes, checks provider API availability
-- **Latency probes** — Every 15 minutes, measures time-to-first-token and total response time
-- Results are exposed via the API's telemetry endpoints
+- **Health probes** — Every 5 minutes, checks provider API availability (accepts 401/403 as reachable)
+- **Latency probes** — Every 15 minutes, measures time-to-first-token and total response time via streaming inference
+- **Probe policies** — Per-provider configuration with daily limits and cost controls
+- **Data retention** — 30 days of historical telemetry data
+- Results are exposed via the API's telemetry endpoints and used for provider ranking
 
 ### 5. Web Interface
 
@@ -119,13 +121,15 @@ The web interface at [openmodels.run](https://openmodels.run) provides:
 
 - Registry management (YAML files, schemas, validation)
 - REST API for model/provider discovery and comparison
-- Telemetry collection (health probes, latency monitoring)
+- Telemetry collection (health probes, latency monitoring, provider ranking)
 - Web interface for browsing and comparing models
+- CMS-powered Insights content platform
+- Rate limiting and API access controls
 
 ### Out of Scope
 
 - Actual LLM inference (delegated to providers)
-- User authentication and authorization (future phase)
+- User authentication and personalization (planned for v3)
 - Billing and payment processing
 - Model fine-tuning or training
 

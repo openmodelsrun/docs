@@ -1,0 +1,119 @@
+---
+title: Version 2.0 Roadmap
+description: OpenModels v2.0 roadmap — advanced telemetry, developer tools, and content platform.
+---
+
+# Version 2.0 Roadmap
+
+Building on the stable v1.0 foundation, v2.0 focuses on developer experience, advanced telemetry, and content-driven insights for the AI community.
+
+**Status Legend:**
+- **Done** — completed and shipped
+- **In Progress** — actively being worked on
+- **Planned** — scheduled, not yet started
+
+---
+
+## Phase 1: Advanced Telemetry — In Progress
+
+Operational telemetry with authenticated probes, cost controls, and richer metrics.
+
+- [x] Provider authentication abstraction (Bearer, API key, query param)
+- [x] Probe payload normalization (lightweight & reasoning profiles)
+- [x] Streaming response validation (transport vs semantic success)
+- [x] Per-provider probe policies with daily limits (Redis-backed)
+- [x] Probe region tracking (`probe_region` column + index)
+- [x] Database migration for probe region support
+- [ ] Authenticated latency probes with real inference calls
+- [ ] Health probe policy integration
+- [ ] Telemetry freshness badge on provider detail pages
+- [ ] Multi-region probe deployment (US, EU, Asia)
+- [ ] P50/P95/P99 latency percentile calculations
+- [ ] Provider uptime SLA tracking and historical reports
+
+**Status:** In Progress
+
+---
+
+## Phase 2: OpenAPI & Swagger — Planned
+
+Full API documentation with interactive exploration.
+
+- [ ] OpenAPI 3.1 spec auto-generated from NestJS decorators
+- [ ] Swagger UI hosted at `/api/docs`
+- [ ] Request/response examples for all endpoints
+- [ ] Authentication documentation (API keys for future use)
+- [ ] Versioned API schema (v1 namespace)
+- [ ] SDK code generation from OpenAPI spec
+
+**Status:** Planned
+
+---
+
+## Phase 3: SDK — Planned
+
+Official TypeScript/JavaScript SDK for programmatic access to the OpenModels API.
+
+- [ ] `@openmodels/sdk` package published to npm
+- [ ] Type-safe client with full IntelliSense support
+- [ ] Model listing, search, and detail retrieval
+- [ ] Provider comparison and ranking queries
+- [ ] Telemetry data access (health, latency, ranked)
+- [ ] Pagination helpers and iterator patterns
+- [ ] Error handling with typed exceptions
+- [ ] Configurable base URL and timeout
+- [ ] Browser and Node.js compatibility
+- [ ] Auto-generated from OpenAPI spec
+
+**Status:** Planned
+
+---
+
+## Phase 4: CLI — Planned
+
+Command-line interface for developers and CI/CD pipelines.
+
+- [ ] `openmodels` CLI tool published to npm
+- [ ] `openmodels models list` — browse and filter models
+- [ ] `openmodels models info <id>` — detailed model info
+- [ ] `openmodels providers list` — browse providers
+- [ ] `openmodels compare <model-id>` — compare providers for a model
+- [ ] `openmodels search <query>` — full-text search
+- [ ] `openmodels telemetry <provider-id>` — health and latency data
+- [ ] Table, JSON, and YAML output formats
+- [ ] Shell completions (bash, zsh, fish)
+- [ ] Configuration file (`~/.openmodelsrc`) for defaults
+
+**Status:** Planned
+
+---
+
+## Phase 5: Insights — Done
+
+Content platform for AI industry analysis, benchmarks, and provider comparisons.
+
+- [x] CMS setup with Payload CMS (headless)
+- [x] Insights collection with rich text, taxonomy, and SEO fields
+- [x] Article schema: title, slug, lead, cover image, body, tags
+- [x] Related models and providers linking
+- [x] Draft/published workflow with versioning
+- [x] Media management for cover images and inline assets
+- [ ] Insights listing page on web app
+- [ ] Individual insight article pages with MDX rendering
+- [ ] RSS feed for insights
+- [ ] Social sharing meta tags (Open Graph, Twitter Cards)
+
+**Status:** In Progress (CMS done, web integration planned)
+
+---
+
+## Release Criteria
+
+Before tagging v2.0:
+
+- [ ] All telemetry probes running with real authentication
+- [ ] SDK published to npm with >90% API coverage
+- [ ] CLI supports all read operations with formatted output
+- [ ] OpenAPI spec covers 100% of public endpoints
+- [ ] Insights CMS integrated with web frontend
+- [ ] Documentation updated for SDK, CLI, and new telemetry features
