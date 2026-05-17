@@ -1,0 +1,43 @@
+---
+title: CLI Overview
+description: OpenModels CLI — browse models, compare providers, and check telemetry from your terminal.
+---
+
+# OpenModels CLI
+
+The `openmodels` CLI gives you fast access to the OpenModels registry directly from your terminal. Browse models, compare providers by price and latency, and check real-time telemetry — all without leaving the command line.
+
+## Features
+
+- **Model discovery** — list, filter, and search models by capability, modality, or name
+- **Provider comparison** — compare pricing, latency, and availability across providers for any model
+- **Telemetry access** — view provider health status and latency metrics
+- **Multiple output formats** — human-readable tables, JSON, or YAML for scripting and CI/CD
+- **Shell completions** — tab completion for bash, zsh, and fish
+- **Configurable** — defaults via config file (`~/.openmodelsrc`) or environment variables
+
+## Quick Example
+
+```bash
+# Search for code generation models
+openmodels search "code generation" --limit 5
+
+# Compare providers for GPT-4o by price
+openmodels compare gpt-4o --sort price
+
+# Check Anthropic's telemetry
+openmodels telemetry anthropic --period 7d
+
+# Output as JSON for scripting
+openmodels models list --format json | jq '.[] | .id'
+```
+
+## Requirements
+
+- **Node.js ≥ 22.0.0**
+
+## Next Steps
+
+- [Installation](/cli/installation) — install or run via npx
+- [Commands](/cli/commands) — full command reference
+- [Configuration](/cli/configuration) — config file, env vars, and precedence

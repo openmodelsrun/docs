@@ -1,0 +1,102 @@
+---
+title: Configuration
+description: Configure the OpenModels CLI with a config file, environment variables, or CLI flags.
+---
+
+# Configuration
+
+The CLI resolves settings from multiple sources with strict precedence:
+
+1. **CLI flags** (highest priority)
+2. **Environment variables**
+3. **Config file** (`~/.openmodelsrc`)
+4. **Built-in defaults** (lowest priority)
+
+---
+
+## Config File
+
+Create a `~/.openmodelsrc` file with your default settings in JSON format:
+
+```json
+{
+  "api_url": "https://api.openmodels.run",
+  "api_key": "om_your_api_key_here",
+  "format": "table",
+  "no_color": false
+}
+```
+
+All fields are optional. Only include the ones you want to override.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `api_url` | `string` | Base URL for the OpenModels API |
+| `api_key` | `string` | API key for authenticated requests |
+| `format` | `"table" \| "json" \| "yaml"` | Default output format |
+| `no_color` | `boolean` | Disable colored output |
+
+If the file contains invalid JSON, the CLI prints a warning to stderr and falls back to defaults.
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `OPENMODELS_API_URL` | API base URL (overrides config file `api_url`) |
+| `OPENMODELS_API_KEY` | API key (overrides config file `api_key`) |
+
+**Example:**
+
+```bash
+export OPENMODELS_API_URL=https://api.openmodels.run
+export OPENMODELS_API_KEY=om_your_api_key_here
+```
+
+---
+
+## CLI Flags
+
+Flags always take the highest priority:
+
+```bash
+# Override API URL for a single command
+openmodels models list --api-url http://localhost:3001
+
+# Force JSON output regardless of config
+openmodels compare gpt-4o --format json
+
+# Disable colors (useful for piping)
+openmodels models list --no-color
+```
+
+---
+
+## Precedence Example
+
+Given:
+- `~/.openmodelsrc` sets `"format": "yaml"`
+- `OPENMODELS_API_URL` is set to `https://staging.api.openmodels.run`
+- You run: `openmodels models list --format json`
+
+The resolved config will be:
+- `format` → `json` (CLI flag wins)
+- `api_url` → `https://staging.api.openmodels.run` (env var wins over config file)
+- `api_key` → value from `~/.openmodelsrc` (no higher-priority source)
+
+---
+
+## Non-TTY Environments
+
+When running in non-interactive environments (CI/CD pipelines, piped output), the CLI automatically:
+
+- Disables spinner animations
+- Uses plain text output without ANSI escape codes when stdout is not a TTY
+
+For explicit control, use `--no-color` and `--format json` in scripts:
+
+```bash
+# CI-friendly usage
+openmodels models list --format json --no-color | jq '.[] | .id'
+```

@@ -14,7 +14,7 @@ Building on the stable v1.0 foundation, v2.0 focuses on developer experience, ad
 
 ---
 
-## Phase 1: Advanced Telemetry — In Progress
+## Phase 1: Advanced Telemetry — Done
 
 Operational telemetry with authenticated probes, cost controls, and richer metrics.
 
@@ -24,14 +24,14 @@ Operational telemetry with authenticated probes, cost controls, and richer metri
 - [x] Per-provider probe policies with daily limits (Redis-backed)
 - [x] Probe region tracking (`probe_region` column + index)
 - [x] Database migration for probe region support
-- [ ] Authenticated latency probes with real inference calls
-- [ ] Health probe policy integration
-- [ ] Telemetry freshness badge on provider detail pages
-- [ ] Multi-region probe deployment (US, EU, Asia)
-- [ ] P50/P95/P99 latency percentile calculations
-- [ ] Provider uptime SLA tracking and historical reports
+- [x] Authenticated latency probes with real inference calls
+- [x] Health probe policy integration
+- [x] Telemetry freshness badge on provider detail pages
+- [x] P50/P95/P99 latency percentile calculations
+- [x] Multi-region probe deployment (US, EU, Asia)
+- [x] Provider uptime SLA tracking and historical reports
 
-**Status:** In Progress
+**Status:** Done
 
 ---
 
@@ -69,22 +69,22 @@ Official TypeScript/JavaScript SDK for programmatic access to the OpenModels API
 
 ---
 
-## Phase 4: CLI — Planned
+## Phase 4: CLI — Done
 
 Command-line interface for developers and CI/CD pipelines.
 
-- [ ] `openmodels` CLI tool published to npm
-- [ ] `openmodels models list` — browse and filter models
-- [ ] `openmodels models info <id>` — detailed model info
-- [ ] `openmodels providers list` — browse providers
-- [ ] `openmodels compare <model-id>` — compare providers for a model
-- [ ] `openmodels search <query>` — full-text search
-- [ ] `openmodels telemetry <provider-id>` — health and latency data
-- [ ] Table, JSON, and YAML output formats
-- [ ] Shell completions (bash, zsh, fish)
-- [ ] Configuration file (`~/.openmodelsrc`) for defaults
+- [x] `@openmodels/cli` package published to npm
+- [x] `openmodels models list` — browse and filter models
+- [x] `openmodels models info <id>` — detailed model info
+- [x] `openmodels providers list` — browse providers
+- [x] `openmodels compare <model-id>` — compare providers for a model
+- [x] `openmodels search <query>` — full-text search
+- [x] `openmodels telemetry <provider-id>` — health and latency data
+- [x] Table, JSON, and YAML output formats
+- [x] Shell completions (bash, zsh, fish)
+- [x] Configuration file (`~/.openmodelsrc`) for defaults
 
-**Status:** Planned
+**Status:** Done
 
 ---
 
@@ -98,12 +98,12 @@ Content platform for AI industry analysis, benchmarks, and provider comparisons.
 - [x] Related models and providers linking
 - [x] Draft/published workflow with versioning
 - [x] Media management for cover images and inline assets
-- [ ] Insights listing page on web app
-- [ ] Individual insight article pages with MDX rendering
-- [ ] RSS feed for insights
-- [ ] Social sharing meta tags (Open Graph, Twitter Cards)
+- [x] Insights listing page on web app
+- [x] Individual insight article pages with Lexical rendering
+- [x] RSS feed for insights
+- [x] Social sharing meta tags (Open Graph, Twitter Cards)
 
-**Status:** In Progress (CMS done, web integration planned)
+**Status:** Done
 
 ---
 
@@ -111,9 +111,9 @@ Content platform for AI industry analysis, benchmarks, and provider comparisons.
 
 Before tagging v2.0:
 
-- [ ] All telemetry probes running with real authentication
+- [x] All telemetry probes running with real authentication
 - [ ] SDK published to npm with >90% API coverage
-- [ ] CLI supports all read operations with formatted output
+- [x] CLI supports all read operations with formatted output
 - [ ] OpenAPI spec covers 100% of public endpoints
-- [ ] Insights CMS integrated with web frontend
+- [x] Insights CMS integrated with web frontend
 - [ ] Documentation updated for SDK, CLI, and new telemetry features

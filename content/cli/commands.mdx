@@ -1,0 +1,203 @@
+---
+title: Commands
+description: Full command reference for the OpenModels CLI.
+---
+
+# Commands
+
+## Global Options
+
+These options apply to all commands:
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--format <type>` | Output format: `table`, `json`, `yaml` | `table` |
+| `--api-url <url>` | API base URL | `https://api.openmodels.run` |
+| `--api-key <key>` | API authentication key | — |
+| `--no-color` | Disable colored output | `false` |
+| `--verbose` | Show detailed error information | `false` |
+| `-v, --version` | Show CLI version | — |
+| `-h, --help` | Show help | — |
+
+---
+
+## models list
+
+List models with optional filters and sorting.
+
+```bash
+openmodels models list [options]
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--capability <type>` | Filter by capability (e.g. `chat`, `completion`, `embedding`) |
+| `--modality <type>` | Filter by modality (e.g. `text`, `image`, `audio`) |
+| `--sort <field>` | Sort by field (e.g. `context_window`, `name`, `created_at`) |
+| `--limit <n>` | Maximum number of results |
+
+**Examples:**
+
+```bash
+# List all models
+openmodels models list
+
+# Filter by capability, sort by context window
+openmodels models list --capability chat --sort context_window
+
+# Get top 10 models as JSON
+openmodels models list --limit 10 --format json
+```
+
+---
+
+## models info
+
+Show detailed information about a specific model.
+
+```bash
+openmodels models info <model-id>
+```
+
+**Examples:**
+
+```bash
+openmodels models info claude-opus-4-6
+openmodels models info gpt-4o --format yaml
+```
+
+---
+
+## providers list
+
+List inference providers.
+
+```bash
+openmodels providers list [options]
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--search <query>` | Filter providers by name |
+
+**Examples:**
+
+```bash
+# List all providers
+openmodels providers list
+
+# Search for a specific provider
+openmodels providers list --search anthropic
+```
+
+---
+
+## compare
+
+Compare providers for a given model side-by-side.
+
+```bash
+openmodels compare <model-id> [options]
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--sort <field>` | Sort by: `price`, `latency`, `uptime` |
+
+**Examples:**
+
+```bash
+# Compare all providers for GPT-4o
+openmodels compare gpt-4o
+
+# Sort by price
+openmodels compare gpt-4o --sort price
+
+# Output as JSON for further processing
+openmodels compare claude-opus-4-6 --format json
+```
+
+---
+
+## search
+
+Full-text search across models.
+
+```bash
+openmodels search <query> [options]
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--limit <n>` | Maximum number of results |
+
+**Examples:**
+
+```bash
+openmodels search "code generation" --limit 10
+openmodels search "vision" --format json
+```
+
+---
+
+## telemetry
+
+View provider health status and latency metrics.
+
+```bash
+openmodels telemetry <provider-id> [options]
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--period <duration>` | Time period (e.g. `24h`, `7d`, `30d`) |
+
+**Examples:**
+
+```bash
+# Check Anthropic telemetry
+openmodels telemetry anthropic
+
+# Last 7 days
+openmodels telemetry openai --period 7d
+
+# Machine-readable output
+openmodels telemetry together-ai --format json
+```
+
+---
+
+## completions
+
+Generate shell completion scripts.
+
+```bash
+openmodels completions <shell>
+```
+
+Supported shells: `bash`, `zsh`, `fish`.
+
+**Setup:**
+
+```bash
+# Bash
+openmodels completions bash >> ~/.bashrc
+
+# Zsh
+openmodels completions zsh > ~/.zfunc/_openmodels
+
+# Fish
+openmodels completions fish > ~/.config/fish/completions/openmodels.fish
+```
+
+After adding completions, restart your shell or source the config file.
