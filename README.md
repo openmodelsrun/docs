@@ -2,7 +2,7 @@
 
 Documentation site for [OpenModels](https://github.com/openmodelsrun/openmodels) — built with [Nextra](https://nextra.site) on Next.js 16.
 
-**Version:** 0.7.5
+**Version:** 0.7.6
 
 ## Prerequisites
 

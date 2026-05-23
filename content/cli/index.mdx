@@ -19,11 +19,14 @@ The `openmodels` CLI gives you fast access to the OpenModels registry directly f
 ## Quick Example
 
 ```bash
+# Install
+npm install -g openmodels-cli
+
 # Search for code generation models
 openmodels search "code generation" --limit 5
 
-# Compare providers for GPT-4o by price
-openmodels compare gpt-4o --sort price
+# Compare providers for GPT-5 by price
+openmodels compare gpt-5 --sort price
 
 # Check Anthropic's telemetry
 openmodels telemetry anthropic --period 7d
