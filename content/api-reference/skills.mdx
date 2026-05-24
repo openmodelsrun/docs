@@ -1,0 +1,235 @@
+---
+title: Skills API
+description: API reference for browsing, searching, and filtering AI agent skills — includes endpoints for listing skills with rich filtering and retrieving skill details.
+---
+
+# Skills API
+
+The Skills API lets you browse the OpenModels Skills catalog, search for skills by name or description, and filter by category, complexity, recommended model, or compatible tool.
+
+## List Skills
+
+```
+GET /api/skills
+```
+
+Search and list skills with optional filtering and pagination.
+
+### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `search` | string | No | — | Full-text search across skill name and description |
+| `category` | string | No | — | Filter by category (e.g. `development`, `testing`, `security`) |
+| `complexity` | string | No | — | Filter by complexity level (`beginner`, `intermediate`, `advanced`) |
+| `tag` | string | No | — | Filter by tag (exact match, e.g. `code-quality`) |
+| `model` | string | No | — | Filter by recommended model ID (e.g. `claude-opus-4-6`) |
+| `tool` | string | No | — | Filter by compatible tool (e.g. `kiro`, `cursor`, `claude-code`) |
+| `sort` | string | No | `recency` | Sort order: `name` (A-Z), `recency` (newest first), `complexity` (simplest first) |
+| `page` | integer | No | `1` | Page number (1-indexed) |
+| `limit` | integer | No | `20` | Items per page (max 100) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/skills?category=development&complexity=intermediate&limit=10"
+```
+
+### Example Response
+
+```json
+{
+  "items": [
+    {
+      "id": "code-review",
+      "name": "Code Review",
+      "description": "Automated code review that provides actionable feedback on code quality, potential bugs, performance issues, security vulnerabilities, and style violations.",
+      "category": "development",
+      "tags": ["code-quality", "automation", "developer-tools", "pull-request", "best-practices"],
+      "author": {
+        "name": "OpenModels Community",
+        "github": "openmodelsrun"
+      },
+      "recommended_models": ["claude-opus-4-6", "gpt-5", "gemini-2-5-pro", "deepseek-v4"],
+      "min_context_window": 32000,
+      "modalities": {
+        "input": ["code", "text"],
+        "output": ["text", "code"]
+      },
+      "complexity": "intermediate",
+      "use_cases": [
+        "Pull request review automation",
+        "Code quality gates in CI pipelines",
+        "Pre-commit code analysis"
+      ],
+      "example_prompt": "Review the following code changes for potential bugs, performance issues, and security vulnerabilities...",
+      "related_skills": ["unit-test-generation", "security-audit", "refactoring-assistant"],
+      "compatible_tools": ["claude-code", "cursor", "github-copilot", "kiro", "any"],
+      "created_at": "2026-05-24T10:00:00.000Z",
+      "updated_at": "2026-05-24T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 15,
+    "total_pages": 2
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `items` | array | Array of skill objects |
+| `items[].id` | string | Unique skill identifier (kebab-case) |
+| `items[].name` | string | Human-readable display name |
+| `items[].description` | string | Detailed description of the skill |
+| `items[].category` | string | Primary category |
+| `items[].tags` | string[] | Searchable tags |
+| `items[].author` | object | Author information (`name`, `github`, `url`) |
+| `items[].recommended_models` | string[] | Model IDs that work well with this skill |
+| `items[].min_context_window` | integer | Minimum context window required (optional) |
+| `items[].modalities` | object | Input and output modalities |
+| `items[].complexity` | string | Complexity level (`beginner`, `intermediate`, `advanced`) |
+| `items[].use_cases` | string[] | Concrete use cases |
+| `items[].example_prompt` | string | Ready-to-use prompt template |
+| `items[].related_skills` | string[] | Related skill IDs (optional) |
+| `items[].compatible_tools` | string[] | Compatible AI tools (optional) |
+| `items[].created_at` | string | ISO 8601 creation timestamp |
+| `items[].updated_at` | string | ISO 8601 last update timestamp |
+| `pagination.page` | integer | Current page number |
+| `pagination.limit` | integer | Items per page |
+| `pagination.total` | integer | Total number of matching skills |
+| `pagination.total_pages` | integer | Total number of pages |
+
+---
+
+## Get Skill
+
+```
+GET /api/skills/:id
+```
+
+Retrieve full details for a single skill by its unique identifier.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The skill's unique identifier (e.g. `code-review`, `sql-generation`) |
+
+### Example Request
+
+```bash
+curl "https://api.openmodels.run/api/skills/code-review"
+```
+
+### Example Response
+
+```json
+{
+  "id": "code-review",
+  "name": "Code Review",
+  "description": "Automated code review that provides actionable feedback on code quality, potential bugs, performance issues, security vulnerabilities, and style violations. Analyzes code changes with the rigor of a senior engineer, providing specific suggestions with code examples.",
+  "category": "development",
+  "tags": ["code-quality", "automation", "developer-tools", "pull-request", "best-practices"],
+  "author": {
+    "name": "OpenModels Community",
+    "github": "openmodelsrun"
+  },
+  "source_url": "https://github.com/openmodelsrun/skills/tree/main/skills/code-review.yaml",
+  "recommended_models": ["claude-opus-4-6", "gpt-5", "gemini-2-5-pro", "deepseek-v4"],
+  "min_context_window": 32000,
+  "modalities": {
+    "input": ["code", "text"],
+    "output": ["text", "code"]
+  },
+  "complexity": "intermediate",
+  "use_cases": [
+    "Pull request review automation",
+    "Code quality gates in CI pipelines",
+    "Pre-commit code analysis",
+    "Mentoring junior developers through code feedback",
+    "Enforcing team coding standards"
+  ],
+  "example_prompt": "Review the following code changes for:\n1. Potential bugs or logic errors\n2. Performance issues or inefficiencies\n3. Security vulnerabilities\n4. Style violations and readability concerns\n5. Missing error handling or edge cases\n\nFor each issue found, provide:\n- Severity (critical/warning/suggestion)\n- Explanation of the problem\n- Concrete fix with code example\n\nCode to review:\n```\n[paste code here]\n```",
+  "related_skills": ["unit-test-generation", "security-audit", "refactoring-assistant"],
+  "compatible_tools": ["claude-code", "cursor", "github-copilot", "kiro", "any"],
+  "created_at": "2026-05-24T10:00:00.000Z",
+  "updated_at": "2026-05-24T10:00:00.000Z"
+}
+```
+
+### Error Responses
+
+| Status | Type | Description |
+|--------|------|-------------|
+| `404` | `NOT_FOUND` | Skill with the given ID does not exist |
+
+---
+
+## Filter Examples
+
+### By category
+
+```bash
+# All development skills
+curl "https://api.openmodels.run/api/skills?category=development"
+
+# All security skills
+curl "https://api.openmodels.run/api/skills?category=security"
+```
+
+### By recommended model
+
+```bash
+# Skills that work well with Claude Opus 4.6
+curl "https://api.openmodels.run/api/skills?model=claude-opus-4-6"
+```
+
+### By compatible tool
+
+```bash
+# Skills compatible with Kiro
+curl "https://api.openmodels.run/api/skills?tool=kiro"
+```
+
+### By complexity
+
+```bash
+# Beginner-friendly skills (work with smaller models)
+curl "https://api.openmodels.run/api/skills?complexity=beginner"
+```
+
+### Combined filters
+
+```bash
+# Advanced development skills for Claude, sorted by name
+curl "https://api.openmodels.run/api/skills?category=development&complexity=advanced&model=claude-opus-4-6&sort=name"
+```
+
+---
+
+## Categories
+
+| Category | Description |
+|----------|-------------|
+| `development` | Writing, reviewing, and improving code |
+| `writing` | Generating and transforming written content |
+| `data` | Analyzing, transforming, and visualizing data |
+| `research` | Gathering and synthesizing information |
+| `creative` | Brainstorming and creative problem-solving |
+| `ops` | Deployment, CI/CD, and infrastructure |
+| `testing` | Test generation and quality assurance |
+| `security` | Vulnerability detection and hardening |
+| `productivity` | Workflow automation and efficiency |
+
+## Complexity Levels
+
+| Level | Description |
+|-------|-------------|
+| `beginner` | Works well with smaller/faster models, simple single-step tasks |
+| `intermediate` | Needs capable models, multi-step reasoning |
+| `advanced` | Requires top-tier models, complex analysis, large context windows |
