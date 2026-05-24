@@ -1,0 +1,192 @@
+---
+title: Skills
+description: Architecture overview of the OpenModels Skills catalog — structured AI agent skills with metadata, recommended models, and example prompts.
+---
+
+# Skills
+
+The Skills catalog is a community-maintained collection of structured AI agent skills. Each skill defines a specific task that LLM agents excel at, complete with metadata, recommended models, example prompts, and compatibility information.
+
+## Overview
+
+Skills bridge the gap between raw model capabilities and practical use cases. While models define *what* an LLM can do, skills define *how* to use it effectively for a specific task.
+
+```
+Models (what)  →  Skills (how)  →  Output (result)
+claude-opus-4-6    code-review       Actionable PR feedback
+gpt-5              sql-generation    Optimized SQL query
+gemini-2-5-pro     security-audit    Vulnerability report
+```
+
+## Repository Structure
+
+Skills live in a separate repository: [openmodelsrun/skills](https://github.com/openmodelsrun/skills)
+
+```
+skills/
+├── skills/                    # One YAML file per skill
+│   ├── code-review.yaml
+│   ├── sql-generation.yaml
+│   ├── security-audit.yaml
+│   └── ...
+├── categories/
+│   └── categories.yaml        # Category definitions
+├── schemas/
+│   ├── skill.schema.json      # JSON Schema for validation
+│   └── category.schema.json
+├── validate.py                # Validation script
+└── .github/workflows/
+    └── validate.yml           # CI validation on PR
+```
+
+## Skill Format
+
+Each skill is a YAML file validated against a JSON Schema. The filename must match the `id` field.
+
+### Example
+
+```yaml
+id: code-review
+name: Code Review
+description: >
+  Automated code review that provides actionable feedback on code quality,
+  potential bugs, performance issues, security vulnerabilities, and style
+  violations.
+category: development
+tags:
+  - code-quality
+  - automation
+  - pull-request
+author:
+  name: OpenModels Community
+  github: openmodelsrun
+recommended_models:
+  - claude-opus-4-6
+  - gpt-5
+  - gemini-2-5-pro
+min_context_window: 32000
+modalities:
+  input:
+    - code
+    - text
+  output:
+    - text
+    - code
+complexity: intermediate
+use_cases:
+  - Pull request review automation
+  - Code quality gates in CI pipelines
+  - Pre-commit code analysis
+example_prompt: |
+  Review the following code for bugs, performance, and style...
+related_skills:
+  - unit-test-generation
+  - security-audit
+compatible_tools:
+  - claude-code
+  - cursor
+  - kiro
+  - any
+created_at: "2026-05-24T10:00:00.000Z"
+updated_at: "2026-05-24T10:00:00.000Z"
+```
+
+## Schema Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique kebab-case identifier. Must match filename. |
+| `name` | string | Yes | Human-readable display name. |
+| `description` | string | Yes | What the skill does and when to use it (10–2000 chars). |
+| `category` | string | Yes | Primary category (see values below). |
+| `tags` | string[] | Yes | 1–20 searchable tags in kebab-case. |
+| `author` | object | Yes | Author info: `name` (required), `github`, `url` (optional). |
+| `source_url` | string | No | Link to source code or extended documentation. |
+| `recommended_models` | string[] | Yes | Model IDs from the OpenModels registry. |
+| `min_context_window` | integer | No | Minimum tokens needed (1000–10000000). |
+| `modalities` | object | Yes | `input` and `output` arrays of modality values. |
+| `complexity` | string | Yes | `beginner`, `intermediate`, or `advanced`. |
+| `use_cases` | string[] | Yes | 1–10 concrete use cases. |
+| `example_prompt` | string | Yes | Ready-to-use prompt template (10–5000 chars). |
+| `related_skills` | string[] | No | IDs of related skills for discovery. |
+| `compatible_tools` | string[] | No | AI tools this works with. |
+| `created_at` | ISO 8601 | Yes | When the skill was created. |
+| `updated_at` | ISO 8601 | Yes | When the skill was last updated. |
+
+## Categories
+
+| ID | Name | Description |
+|----|------|-------------|
+| `development` | Development | Writing, reviewing, and improving code |
+| `writing` | Writing | Generating and transforming written content |
+| `data` | Data | Analyzing, transforming, and visualizing data |
+| `research` | Research | Gathering and synthesizing information |
+| `creative` | Creative | Brainstorming and creative problem-solving |
+| `ops` | DevOps & Infrastructure | Deployment, CI/CD, and infrastructure |
+| `testing` | Testing & QA | Test generation and quality assurance |
+| `security` | Security | Vulnerability detection and hardening |
+| `productivity` | Productivity | Workflow automation and efficiency |
+
+## Complexity Levels
+
+| Level | Description | Model Tier |
+|-------|-------------|-----------|
+| `beginner` | Simple single-step tasks | Works with smaller/faster models |
+| `intermediate` | Multi-step reasoning | Needs capable mid-tier models |
+| `advanced` | Complex analysis, large context | Requires top-tier flagship models |
+
+## Compatible Tools
+
+Skills can declare compatibility with specific AI coding tools:
+
+`claude-code`, `cursor`, `github-copilot`, `kiro`, `windsurf`, `opencode`, `gemini-cli`, `aider`, `continue`, `cody`, `any`
+
+## Integration with the Platform
+
+Skills are ingested into the OpenModels platform database and served via the REST API:
+
+```
+GitHub (openmodelsrun/skills)
+    ↓ git pull
+Server filesystem
+    ↓ python -m ingestion --skills-only
+PostgreSQL (skills table)
+    ↓ REST API
+Web UI (openmodels.run/skills)
+```
+
+### API Endpoints
+
+- `GET /api/skills` — List skills with filtering and pagination
+- `GET /api/skills/:id` — Get skill details
+
+See the [Skills API Reference](/api-reference/skills) for full documentation.
+
+### Cross-References
+
+- **Skill → Models**: Each skill lists `recommended_models` linking to the models registry
+- **Model → Skills**: The platform can show "Skills that work well with this model" on model pages
+- **Search**: Skills are included in the global search index (Cmd+K)
+
+## Validation
+
+All skills are validated on every pull request:
+
+```bash
+cd skills
+pip install -r requirements.txt
+python validate.py
+```
+
+Checks performed:
+1. YAML syntax
+2. Schema conformance (required fields, types, enums, patterns)
+3. No duplicate IDs
+4. Filename matches the `id` field
+5. Related skills reference existing IDs
+
+## Related Pages
+
+- [Skills API Reference](/api-reference/skills) — REST API documentation
+- [Adding a Skill](/contributing/adding-skill) — Step-by-step contribution guide
+- [YAML Schemas](/architecture/schemas) — Registry schema reference

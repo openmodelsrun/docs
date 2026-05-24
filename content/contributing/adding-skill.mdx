@@ -1,0 +1,289 @@
+---
+title: Adding a Skill
+description: Step-by-step guide for contributing a new AI agent skill to the OpenModels Skills catalog.
+---
+
+# Adding a Skill
+
+This guide walks you through contributing a new skill to the OpenModels Skills catalog. Each skill is a single YAML file that defines a structured prompt workflow for AI agents.
+
+---
+
+## Prerequisites
+
+Before you begin:
+
+1. **Fork the repository** — Fork [openmodelsrun/skills](https://github.com/openmodelsrun/skills) and clone it locally.
+2. **Understand the format** — Review the [Skills Architecture](/architecture/skills) page for schema details.
+3. **Install Python 3.11+** — The validation script requires Python.
+
+```bash
+git clone https://github.com/<your-username>/skills.git
+cd skills
+pip install -r requirements.txt
+```
+
+---
+
+## Step 1: Choose Your Skill
+
+A good skill is:
+
+- **Specific** — Solves a concrete, well-defined task (not "help me code")
+- **Verifiable** — Has clear expected outputs
+- **Model-aware** — Recommends appropriate models for the task complexity
+- **Well-prompted** — The example prompt is immediately usable
+- **Unique** — Doesn't duplicate an existing skill
+
+Check the [existing skills](https://www.openmodels.run/skills) to avoid overlap.
+
+---
+
+## Step 2: Create the YAML File
+
+Create a new file in the `skills/` directory. The filename must match the `id` field.
+
+**File path:** `skills/<skill-id>.yaml`
+
+### Naming Rules
+
+- Use kebab-case: lowercase alphanumeric with hyphens
+- Pattern: `^[a-z0-9]+(-[a-z0-9]+)*$`
+- Be descriptive but concise: `code-review`, not `cr` or `automated-code-review-with-feedback`
+
+### Complete Example
+
+```yaml
+id: my-new-skill
+name: My New Skill
+description: >
+  A clear description of what this skill does and when to use it.
+  Should be 2-4 sentences covering the purpose, approach, and value.
+category: development
+tags:
+  - relevant-tag
+  - another-tag
+  - specific-technology
+author:
+  name: Your Name
+  github: your-github-username
+recommended_models:
+  - claude-opus-4-6
+  - gpt-5
+  - gemini-2-5-pro
+min_context_window: 32000
+modalities:
+  input:
+    - code
+    - text
+  output:
+    - code
+    - text
+complexity: intermediate
+use_cases:
+  - First concrete use case where this skill excels
+  - Second use case with different context
+  - Third use case showing versatility
+example_prompt: |
+  [Clear instruction for the AI agent]
+
+  Context:
+  - [What information to provide]
+  - [What constraints exist]
+
+  Requirements:
+  1. [First deliverable]
+  2. [Second deliverable]
+  3. [Third deliverable]
+
+  Input:
+  ```
+  [placeholder for user content]
+  ```
+related_skills:
+  - existing-skill-id
+  - another-related-skill
+compatible_tools:
+  - claude-code
+  - cursor
+  - kiro
+  - any
+created_at: "2026-06-01T00:00:00.000Z"
+updated_at: "2026-06-01T00:00:00.000Z"
+```
+
+---
+
+## Step 3: Field Guide
+
+### Required Fields
+
+| Field | Tips |
+|-------|------|
+| `id` | Must match filename. Use kebab-case. |
+| `name` | Human-readable, title case. 2-4 words. |
+| `description` | 10–2000 chars. Explain what, when, and why. |
+| `category` | One of: `development`, `writing`, `data`, `research`, `creative`, `ops`, `testing`, `security`, `productivity` |
+| `tags` | 1–20 tags. Use kebab-case. Be specific. |
+| `author` | At minimum `name`. Add `github` for attribution. |
+| `recommended_models` | 2–5 model IDs from the [OpenModels registry](https://www.openmodels.run/models). |
+| `modalities` | What goes in (`input`) and comes out (`output`). Values: `text`, `image`, `audio`, `video`, `code`, `file` |
+| `complexity` | `beginner` (simple tasks, small models), `intermediate` (multi-step), `advanced` (complex, large context) |
+| `use_cases` | 1–10 concrete scenarios. Start with a verb. |
+| `example_prompt` | The most important field. Must be immediately usable. |
+
+### Optional Fields
+
+| Field | Tips |
+|-------|------|
+| `source_url` | Link to extended docs or source repo. |
+| `min_context_window` | Set if the skill needs large context (e.g., 64K+ for codebase analysis). |
+| `related_skills` | IDs of complementary skills. Helps discovery. |
+| `compatible_tools` | Which AI tools work well. Use `any` if universal. |
+
+---
+
+## Step 4: Writing a Great Example Prompt
+
+The `example_prompt` is what users will copy and use. Make it:
+
+1. **Self-contained** — Include placeholders like `[paste code here]`
+2. **Structured** — Use numbered lists for multi-part requests
+3. **Specific about output** — Tell the model what deliverables you expect
+4. **Realistic** — Based on actual workflows, not toy examples
+
+### Good Example
+
+```yaml
+example_prompt: |
+  Review the following code for:
+  1. Potential bugs or logic errors
+  2. Performance issues
+  3. Security vulnerabilities
+
+  For each issue, provide:
+  - Severity (critical/warning/suggestion)
+  - Explanation of the problem
+  - Concrete fix with code example
+
+  Code to review:
+  ```
+  [paste code here]
+  ```
+```
+
+### Bad Example
+
+```yaml
+example_prompt: |
+  Review this code and tell me if it's good.
+```
+
+---
+
+## Step 5: Choosing Recommended Models
+
+Pick 2–5 models that genuinely work well for the task:
+
+- **Advanced skills** → flagship models: `claude-opus-4-6`, `gpt-5`, `gemini-2-5-pro`
+- **Intermediate skills** → balanced models: `claude-sonnet-4-6`, `gpt-5-4`, `deepseek-v4`
+- **Beginner skills** → fast/cheap models: `gpt-5-4-mini`, `gemini-2-5-flash`, `claude-sonnet-4-6`
+
+Model IDs must exist in the [OpenModels registry](https://www.openmodels.run/models). Use the exact `id` from the registry.
+
+---
+
+## Step 6: Validate Locally
+
+```bash
+python validate.py
+```
+
+The validator checks:
+- YAML syntax
+- Schema conformance (required fields, types, enums)
+- No duplicate IDs
+- Filename matches `id` field
+- Related skills reference existing IDs (warning only)
+
+Fix any errors before submitting.
+
+---
+
+## Step 7: Submit a Pull Request
+
+1. **Create a branch:**
+   ```bash
+   git checkout -b add-skill/my-new-skill
+   ```
+
+2. **Commit:**
+   ```bash
+   git add skills/my-new-skill.yaml
+   git commit -m "feat: add my-new-skill"
+   ```
+
+3. **Push and open a PR** against `main`.
+
+### PR Description Template
+
+```markdown
+## New Skill: My New Skill
+
+**Category:** development
+**Complexity:** intermediate
+
+### What it does
+[1-2 sentences]
+
+### Why it's useful
+[Who benefits and when]
+
+### Tested with
+- [x] Claude Opus 4.6
+- [x] GPT-5
+- [ ] Gemini 2.5 Pro
+```
+
+---
+
+## What Reviewers Look For
+
+- ✅ Validation passes (automated via GitHub Actions)
+- ✅ Skill is specific and actionable (not vague)
+- ✅ Example prompt is immediately usable
+- ✅ Recommended models are appropriate for the complexity
+- ✅ Description clearly explains when to use this skill
+- ✅ No duplicate of an existing skill
+- ✅ Tags are relevant and specific
+
+---
+
+## Tips
+
+### Category Selection
+
+| If your skill... | Use category |
+|-----------------|-------------|
+| Writes or improves code | `development` |
+| Generates text content (docs, emails) | `writing` |
+| Analyzes data or generates queries | `data` |
+| Gathers or summarizes information | `research` |
+| Brainstorms or ideates | `creative` |
+| Handles CI/CD, Docker, infra | `ops` |
+| Generates tests or does QA | `testing` |
+| Finds vulnerabilities or hardens | `security` |
+| Automates workflows (git, tooling) | `productivity` |
+
+### Common Mistakes
+
+- **Too broad** — "Code helper" is not a skill. "Code review with severity labels" is.
+- **Missing placeholders** — Example prompts without `[paste X here]` aren't usable.
+- **Wrong complexity** — If it works fine with GPT-5-4-mini, it's `beginner`, not `advanced`.
+- **Stale timestamps** — Use today's date for `created_at` and `updated_at`.
+
+## Related Pages
+
+- [Skills Architecture](/architecture/skills) — How skills work in the platform
+- [Skills API Reference](/api-reference/skills) — REST API documentation
+- [Browse Skills](https://www.openmodels.run/skills) — See existing skills for inspiration
