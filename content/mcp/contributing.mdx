@@ -1,0 +1,123 @@
+---
+title: Contributing
+description: How to submit a new MCP server to the OpenModels registry via pull request.
+---
+
+# Contributing an MCP Server
+
+The MCP registry is community-driven. Anyone can submit a new server by opening a pull request with a YAML definition file.
+
+## Prerequisites
+
+- A GitHub account
+- An MCP server with a public repository
+- Familiarity with YAML syntax
+
+## Submission Workflow
+
+### 1. Fork and clone
+
+```bash
+git clone https://github.com/YourUsername/OpenModels.git
+cd OpenModels
+```
+
+### 2. Create a server definition
+
+Copy the template and fill in your server's details:
+
+```bash
+cp mcp/servers/_template.yaml mcp/servers/your-server-id.yaml
+```
+
+The filename must match the `id` field inside the YAML file, using kebab-case (e.g., `my-awesome-server.yaml` with `id: my-awesome-server`).
+
+### 3. Fill in required fields
+
+At minimum, your server definition needs:
+
+```yaml
+id: your-server-id
+name: Your Server Name
+description: >
+  A clear description of what your MCP server does,
+  what tools it provides, and when developers should use it.
+author:
+  name: Your Name
+  github: your-github-username
+repository: https://github.com/org/repo
+transport:
+  - stdio
+category: Development
+tags:
+  - relevant-tag
+  - another-tag
+created_at: "2025-01-15T10:00:00.000Z"
+updated_at: "2025-01-15T10:00:00.000Z"
+```
+
+See the [Schema Reference](/mcp/schema) for all available fields.
+
+### 4. Validate locally
+
+Run the validation script to check your definition before submitting:
+
+```bash
+cd mcp
+pip install -r requirements.txt
+python validate.py
+```
+
+The validator checks:
+- YAML syntax
+- Schema conformance (required fields, types, patterns)
+- Filename matches the `id` field
+- No duplicate IDs across the registry
+
+### 5. Open a pull request
+
+```bash
+git checkout -b add-your-server-id
+git add mcp/servers/your-server-id.yaml
+git commit -m "Add your-server-id MCP server"
+git push origin add-your-server-id
+```
+
+Open a PR against the `main` branch. The CI workflow will automatically validate your submission.
+
+## Naming Conventions
+
+| Field | Convention | Example |
+|-------|-----------|---------|
+| `id` | kebab-case, lowercase | `postgres-mcp` |
+| `tags` | kebab-case, lowercase | `code-generation` |
+| Filename | `{id}.yaml` | `postgres-mcp.yaml` |
+
+IDs must match the pattern `^[a-z0-9]+(-[a-z0-9]+)*$` — lowercase alphanumeric with hyphens.
+
+## Validation Rules
+
+The CI pipeline runs on every PR that modifies files in `mcp/servers/`. Your PR will be blocked from merging if:
+
+- The YAML file has syntax errors
+- Required fields are missing or invalid
+- The `id` field doesn't match the filename
+- The `id` conflicts with an existing server
+- Fields exceed length limits (e.g., description > 2000 characters)
+
+Error messages include the JSON pointer path to the failing field (e.g., `/tools/0/name`) and a description of the expected format.
+
+## Tips for a Good Submission
+
+- **Description** — be specific about what the server does and when to use it. Minimum 10 characters, maximum 2000.
+- **Tools** — list all tools with clear descriptions and complete `input_schema` definitions.
+- **Tags** — use 1–20 relevant tags to improve discoverability.
+- **Transport** — list all supported transport types.
+- **Install** — include install configuration (npm package, command, args) so users can set up quickly.
+- **Environment variables** — document any required API keys or configuration.
+
+## Review Process
+
+1. CI validates the YAML definition automatically
+2. A maintainer reviews the submission for quality and accuracy
+3. Once approved and merged, the server appears in the catalog after the next deployment

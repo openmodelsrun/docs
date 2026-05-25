@@ -4,6 +4,7 @@
   "architecture": "Architecture",
   "api-reference": "API Reference",
   "cli": "CLI",
+  "mcp": "MCP",
   "contributing": "Contributing",
   "roadmap": "Roadmap"
 }

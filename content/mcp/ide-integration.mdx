@@ -1,0 +1,189 @@
+---
+title: IDE Integration
+description: Setup guides for connecting MCP servers to Claude Code, Cursor, Windsurf, Gemini CLI, Kiro, and VS Code.
+---
+
+# IDE Integration
+
+The OpenModels MCP platform supports 6 AI IDEs. Each IDE uses a JSON configuration file to define MCP server connections. You can generate these configs automatically from any server's detail page, or write them manually using the formats below.
+
+## Supported IDEs
+
+| IDE | Config File |
+|-----|-------------|
+| Claude Code | `.claude/mcp.json` |
+| Cursor | `.cursor/mcp.json` |
+| Windsurf | `.windsurf/mcp.json` |
+| Gemini CLI | `.gemini/settings.json` |
+| Kiro | `.kiro/mcp.json` |
+| VS Code (Copilot) | `.vscode/mcp.json` |
+
+## Configuration by Transport
+
+### stdio
+
+For servers that run as local processes communicating via standard input/output:
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "@org/package-name"],
+      "env": {
+        "API_KEY": "<YOUR_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+The `command` and `args` fields come from the server's `install` configuration. Environment variables are populated from the server's `env_vars` definitions.
+
+### SSE (Server-Sent Events)
+
+For servers accessible over HTTP with server-sent events:
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "url": "https://example.com/mcp/sse",
+      "env": {
+        "API_KEY": "<YOUR_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+### HTTP Streaming
+
+For servers using bidirectional HTTP streaming:
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "url": "https://example.com/mcp/stream",
+      "env": {
+        "API_KEY": "<YOUR_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+## IDE-Specific Setup
+
+### Claude Code
+
+1. Create `.claude/mcp.json` in your project root (or home directory for global config)
+2. Add the server configuration
+3. Restart Claude Code to pick up the new server
+
+```bash
+mkdir -p .claude
+# Paste config into .claude/mcp.json
+```
+
+### Cursor
+
+1. Create `.cursor/mcp.json` in your project root
+2. Add the server configuration
+3. Cursor detects changes automatically
+
+```bash
+mkdir -p .cursor
+# Paste config into .cursor/mcp.json
+```
+
+### Windsurf
+
+1. Create `.windsurf/mcp.json` in your project root
+2. Add the server configuration
+3. Restart Windsurf or reload the window
+
+```bash
+mkdir -p .windsurf
+# Paste config into .windsurf/mcp.json
+```
+
+### Gemini CLI
+
+1. Create `.gemini/settings.json` in your home directory
+2. Add the server configuration under the `mcpServers` key
+3. The CLI picks up servers on next invocation
+
+```bash
+mkdir -p ~/.gemini
+# Paste config into ~/.gemini/settings.json
+```
+
+### Kiro
+
+1. Create `.kiro/mcp.json` in your project root
+2. Add the server configuration
+3. Kiro detects changes automatically
+
+```bash
+mkdir -p .kiro
+# Paste config into .kiro/mcp.json
+```
+
+### VS Code (Copilot)
+
+1. Create `.vscode/mcp.json` in your project root
+2. Add the server configuration
+3. Reload the VS Code window
+
+```bash
+mkdir -p .vscode
+# Paste config into .vscode/mcp.json
+```
+
+## Using the Connect Panel
+
+The easiest way to get a config snippet:
+
+1. Navigate to any server's detail page at `/mcp/{server-id}`
+2. Find the **Connect** panel
+3. Select your IDE from the tabs
+4. If the server supports multiple transports, choose your preferred one
+5. Click the copy button to copy the config to your clipboard
+6. Paste into the appropriate config file for your IDE
+
+## Using the API
+
+You can also fetch configs programmatically:
+
+```bash
+# Get config for a specific IDE
+curl https://api.openmodels.run/api/v1/mcp/servers/postgres/config/cursor
+curl https://api.openmodels.run/api/v1/mcp/servers/github/config/claude-code
+curl https://api.openmodels.run/api/v1/mcp/servers/fetch/config/vscode-copilot
+```
+
+Supported IDE identifiers: `claude-code`, `cursor`, `windsurf`, `gemini-cli`, `kiro`, `vscode-copilot`
+
+## Environment Variables
+
+Many MCP servers require API keys or other credentials. These appear as placeholders in the generated config:
+
+```json
+"env": {
+  "API_KEY": "<YOUR_API_KEY>"
+}
+```
+
+Replace placeholder values with your actual credentials. Never commit secrets to version control — use environment variables or a secrets manager instead.
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Server not connecting | Verify the config file is in the correct location for your IDE |
+| Command not found | Ensure the package is installed (`npm install -g @org/package`) or use `npx` |
+| Permission denied | Check file permissions on the config file |
+| Environment variable errors | Ensure all required env vars are set with valid values |
+| Transport mismatch | Confirm the server actually supports the transport you configured |

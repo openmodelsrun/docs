@@ -1,0 +1,57 @@
+---
+title: MCP Overview
+description: OpenModels MCP Platform — a community-driven registry for Model Context Protocol servers.
+---
+
+# MCP Platform
+
+The OpenModels MCP Platform is a community-driven registry for [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) servers. It provides a centralized catalog where developers can discover, compare, and integrate MCP servers into their AI workflows.
+
+## What is MCP?
+
+The Model Context Protocol is an open standard that enables AI assistants to interact with external tools, data sources, and services through a unified interface. MCP servers expose:
+
+- **Tools** — functions that AI agents can invoke (e.g., run tests, query databases, search the web)
+- **Resources** — data sources for AI agent consumption (e.g., file access, API responses)
+- **Prompts** — reusable prompt templates with configurable arguments
+
+## Why OpenModels MCP?
+
+- **Discover** — browse and search a curated catalog of MCP servers by category, transport type, or keyword
+- **Compare** — evaluate servers side by side across capabilities, tools, and compatibility
+- **Connect** — generate IDE configuration snippets for one-click integration
+- **Contribute** — submit new servers via pull request with automated validation
+
+## Platform Features
+
+| Feature | Description |
+|---------|-------------|
+| Catalog | Searchable registry at [openmodels.run/mcp](https://openmodels.run/mcp) |
+| Detail pages | Full server info with tools, resources, and prompts |
+| IDE configs | Auto-generated connection snippets for 6 IDEs |
+| Comparison | Side-by-side comparison of 2–4 servers |
+| API access | RESTful API at `/api/v1/mcp/*` |
+| CI validation | Automated schema validation on every PR |
+
+## Supported Transports
+
+MCP servers communicate via one of three transport protocols:
+
+| Transport | Description |
+|-----------|-------------|
+| `stdio` | Standard input/output — local process communication |
+| `sse` | Server-Sent Events — HTTP-based streaming |
+| `http-streaming` | HTTP streaming — bidirectional HTTP communication |
+
+## Categories
+
+Servers are organized into 11 categories:
+
+Development · Productivity · Database · DevOps · AI · Research · Browser Automation · Communication · Filesystem · Cloud · Security
+
+## Next Steps
+
+- [Getting Started](/mcp/getting-started) — browse, search, and connect MCP servers
+- [Contributing](/mcp/contributing) — submit a new server to the registry
+- [Schema Reference](/mcp/schema) — full server definition format
+- [IDE Integration](/mcp/ide-integration) — setup guides for each supported IDE

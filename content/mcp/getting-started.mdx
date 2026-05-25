@@ -1,0 +1,108 @@
+---
+title: Getting Started
+description: Browse, search, and connect MCP servers from the OpenModels registry.
+---
+
+# Getting Started
+
+The MCP catalog is available at [openmodels.run/mcp](https://openmodels.run/mcp). You can browse servers, filter by category or transport, and generate IDE connection configs — all from the web interface.
+
+## Browsing the Catalog
+
+The catalog page displays all registered MCP servers as cards showing:
+
+- Server name and description
+- Author
+- Category badge
+- Supported transport types
+- Tool count and star count
+
+Use the search bar to find servers by name, description, or tags. Results are ranked by relevance with name matches weighted highest.
+
+## Filtering
+
+Apply filters to narrow results:
+
+- **Category** — select one or more categories (OR logic within category)
+- **Transport** — filter by stdio, sse, or http-streaming
+
+When filters are applied across different types, they combine with AND logic. For example, selecting category "Database" and transport "stdio" shows only database servers that support stdio.
+
+## Viewing Server Details
+
+Click any server card to view its full detail page at `/mcp/{server-id}`. The detail page includes:
+
+- Complete description
+- All exposed tools with input schemas
+- Resources with URI templates
+- Prompts with arguments
+- Transport compatibility
+- Repository link, license, and version
+
+## Connecting to Your IDE
+
+Each detail page includes a **Connect** panel where you can:
+
+1. Select your IDE (Claude Code, Cursor, Windsurf, Gemini CLI, Kiro, VS Code)
+2. Choose a transport type (if the server supports multiple)
+3. Copy the generated configuration snippet
+4. Paste it into your IDE's MCP config file
+
+See [IDE Integration](/mcp/ide-integration) for detailed setup instructions per IDE.
+
+## Using the API
+
+The MCP registry is also available programmatically:
+
+```bash
+# List all servers
+curl https://api.openmodels.run/api/v1/mcp/servers
+
+# Search for database servers
+curl "https://api.openmodels.run/api/v1/mcp/servers?q=database&category=Database"
+
+# Get a specific server
+curl https://api.openmodels.run/api/v1/mcp/servers/postgres
+
+# Get IDE config
+curl https://api.openmodels.run/api/v1/mcp/servers/postgres/config/cursor
+
+# Get categories with counts
+curl https://api.openmodels.run/api/v1/mcp/categories
+
+# Get registry stats
+curl https://api.openmodels.run/api/v1/mcp/stats
+```
+
+### Pagination
+
+List endpoints support pagination via `page` and `limit` query parameters:
+
+```bash
+# Page 2, 10 items per page
+curl "https://api.openmodels.run/api/v1/mcp/servers?page=2&limit=10"
+```
+
+Response includes pagination metadata:
+
+```json
+{
+  "items": [...],
+  "pagination": {
+    "total": 42,
+    "page": 2,
+    "limit": 10,
+    "total_pages": 5
+  }
+}
+```
+
+## Comparing Servers
+
+When evaluating multiple servers with similar functionality:
+
+1. Select 2–4 servers using the compare checkbox on each card
+2. Click the compare button
+3. View a side-by-side table showing transport support, tool/resource/prompt counts, license, and last updated date
+
+Differing values are highlighted for quick identification.

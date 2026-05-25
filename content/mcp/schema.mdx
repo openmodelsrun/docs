@@ -1,0 +1,199 @@
+---
+title: Schema Reference
+description: Complete reference for the MCP server definition YAML schema.
+---
+
+# Schema Reference
+
+Every MCP server definition is validated against a JSON Schema (Draft 7) located at `mcp/schemas/server.schema.json`. This page documents all fields, their types, and constraints.
+
+## Required Fields
+
+| Field | Type | Constraints |
+|-------|------|-------------|
+| `id` | string | Kebab-case, 1–128 chars, pattern: `^[a-z0-9]+(-[a-z0-9]+)*$` |
+| `name` | string | 1–255 characters |
+| `description` | string | 10–2000 characters |
+| `author` | object | Must include `name` and `github` |
+| `repository` | string | Valid URI format |
+| `transport` | array | 1–3 values from: `stdio`, `sse`, `http-streaming` |
+| `category` | enum | One of the 11 supported categories |
+| `tags` | array | 1–20 kebab-case strings, each max 64 chars |
+| `created_at` | string | ISO 8601 datetime (`YYYY-MM-DDTHH:MM:SS.sssZ`) |
+| `updated_at` | string | ISO 8601 datetime (`YYYY-MM-DDTHH:MM:SS.sssZ`) |
+
+## Optional Fields
+
+| Field | Type | Constraints |
+|-------|------|-------------|
+| `tools` | array | Max 200 entries |
+| `resources` | array | Max 100 entries |
+| `prompts` | array | Max 100 entries |
+| `install` | object | Package install configuration |
+| `env_vars` | array | Environment variable definitions |
+| `license` | string | License identifier (e.g., `MIT`, `Apache-2.0`) |
+| `version` | string | Server version |
+| `stars` | integer | GitHub star count |
+
+## Author Object
+
+```yaml
+author:
+  name: Author Name      # Required, 1–128 characters
+  github: github-handle  # Required, 1–64 characters
+```
+
+## Categories
+
+The `category` field must be one of:
+
+- `Development`
+- `Productivity`
+- `Database`
+- `DevOps`
+- `AI`
+- `Research`
+- `Browser Automation`
+- `Communication`
+- `Filesystem`
+- `Cloud`
+- `Security`
+
+## Tools
+
+Each tool entry requires:
+
+```yaml
+tools:
+  - name: tool_name           # Required, 1–128 characters
+    description: What it does  # Required, 1–1000 characters
+    input_schema:              # Required, JSON Schema object
+      type: object
+      properties:
+        param_name:
+          type: string
+          description: Parameter description
+      required:
+        - param_name
+```
+
+## Resources
+
+Each resource entry requires:
+
+```yaml
+resources:
+  - uri_template: "file:///{path}"  # Required, 1–2048 characters
+    description: What this provides  # Required, 1–1000 characters
+```
+
+## Prompts
+
+Each prompt entry requires:
+
+```yaml
+prompts:
+  - name: prompt_name              # Required, 1–128 characters
+    description: What it does       # Required, 1–1000 characters
+    arguments:                      # Required, array of argument objects
+      - name: arg_name             # Required, 1–128 characters
+        description: Argument info  # Required, 1–500 characters
+```
+
+## Install Configuration
+
+The `install` object defines how to run the server:
+
+```yaml
+install:
+  npm: "@org/package-name"    # npm package name
+  command: npx                # Command to execute
+  args:                       # Command arguments
+    - "-y"
+    - "@org/package-name"
+```
+
+## Environment Variables
+
+```yaml
+env_vars:
+  - name: API_KEY              # Variable name
+    description: API key for authentication
+    required: true             # Whether the variable is required
+```
+
+## Complete Example
+
+```yaml
+id: example-server
+name: Example MCP Server
+description: >
+  A detailed description of what this MCP server does,
+  what tools it provides, and when to use it.
+author:
+  name: Author Name
+  github: author-github
+repository: https://github.com/org/repo
+license: MIT
+version: 1.0.0
+transport:
+  - stdio
+  - sse
+category: Development
+tags:
+  - code-generation
+  - testing
+tools:
+  - name: run_tests
+    description: Runs the project test suite
+    input_schema:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Path to test directory
+      required:
+        - path
+resources:
+  - uri_template: "file:///{path}"
+    description: Access to project files
+prompts:
+  - name: review_code
+    description: Reviews code for quality issues
+    arguments:
+      - name: file_path
+        description: Path to the file to review
+      - name: focus_area
+        description: Specific area to focus on
+install:
+  npm: "@org/example-server"
+  command: npx
+  args:
+    - "-y"
+    - "@org/example-server"
+env_vars:
+  - name: API_KEY
+    description: API key for authentication
+    required: true
+stars: 1250
+created_at: "2025-01-15T10:00:00.000Z"
+updated_at: "2025-06-01T12:00:00.000Z"
+```
+
+## Validation
+
+The schema enforces `additionalProperties: false` — any unrecognized fields will cause validation to fail. This ensures all server definitions remain consistent and machine-readable.
+
+Run validation locally:
+
+```bash
+cd mcp
+python validate.py
+```
+
+Validation errors include the JSON pointer path to the failing field:
+
+```
+ERROR: /tools/0/name — String is too long (150 > 128)
+ERROR: /transport/0 — 'websocket' is not one of ['stdio', 'sse', 'http-streaming']
+```
