@@ -43,17 +43,18 @@ curl "https://api.openmodels.run/api/models?search=deepseek&capability=reasoning
 
 ## Response Format
 
-All responses return JSON with a consistent structure. List endpoints wrap results in a `data` array with pagination metadata:
+Paginated model/provider endpoints return an `items` array with pagination metadata. Other endpoints can return arrays or objects directly; see their individual references.
 
 ```json
 {
-  "data": [
+  "items": [
     { "id": "deepseek-v3", "name": "DeepSeek V3", "..." : "..." }
   ],
   "pagination": {
     "page": 1,
     "limit": 20,
-    "total": 44
+    "total": 44,
+    "total_pages": 3
   }
 }
 ```
@@ -176,9 +177,9 @@ When rate limited, the API returns a `429` status with an error response:
 | `GET` | [`/api/stats`](/api-reference/system#registry-stats) | Registry statistics (counts + last sync) |
 | `GET` | [`/api/search`](/api-reference/system#search) | Unified search across models and providers |
 | `GET` | [`/api/search/index`](/api-reference/system#search-index) | Lightweight search index for client-side use |
-| `GET` | [`/api/telemetry/health/:provider_id`](/api-reference/telemetry#provider-health) | Provider health status |
-| `GET` | [`/api/telemetry/latency/:provider_id`](/api-reference/telemetry#provider-latency) | Provider latency metrics |
-| `GET` | [`/api/telemetry/ranked/:model_id`](/api-reference/telemetry#ranked-providers) | Ranked providers for a model |
+| `GET` | [`/api/providers/:id/health`](/api-reference/telemetry#provider-health) | Provider health status |
+| `GET` | [`/api/providers/:id/latency`](/api-reference/telemetry#provider-latency) | Provider latency metrics |
+| `GET` | [`/api/models/:id/providers/ranked`](/api-reference/telemetry#ranked-providers) | Ranked providers for a model |
 | `GET` | [`/api/health`](/api-reference/system#health-check) | System health check |
 
 ## Quick Example
@@ -191,7 +192,7 @@ curl "https://api.openmodels.run/api/models?capability=vision&limit=5"
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "id": "gpt-4o",
       "name": "GPT-4o",

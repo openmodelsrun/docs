@@ -36,7 +36,7 @@ curl "https://api.openmodels.run/api/models?search=deepseek&capability=reasoning
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "id": "deepseek-v3",
       "name": "DeepSeek V3",
@@ -72,16 +72,16 @@ curl "https://api.openmodels.run/api/models?search=deepseek&capability=reasoning
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `data` | array | Array of model objects |
-| `data[].id` | string | Unique model identifier (kebab-case) |
-| `data[].name` | string | Human-readable display name |
-| `data[].description` | string | Detailed description of the model |
-| `data[].capabilities` | string[] | Supported capabilities (e.g. `chat`, `vision`, `reasoning`) |
-| `data[].modalities` | string[] | Supported input/output modalities (e.g. `text`, `image`, `audio`) |
-| `data[].context_window` | integer | Maximum context window size in tokens |
-| `data[].licensing` | string | License type (`proprietary`, `apache-2.0`, `mit`, `other`, etc.) |
-| `data[].created_at` | string | ISO 8601 timestamp when the model was added |
-| `data[].updated_at` | string | ISO 8601 timestamp when the model was last updated |
+| `items` | array | Array of model objects |
+| `items[].id` | string | Unique model identifier (kebab-case) |
+| `items[].name` | string | Human-readable display name |
+| `items[].description` | string | Detailed description of the model |
+| `items[].capabilities` | string[] | Supported capabilities (e.g. `chat`, `vision`, `reasoning`) |
+| `items[].modalities` | string[] | Supported input/output modalities (e.g. `text`, `image`, `audio`) |
+| `items[].context_window` | integer | Maximum context window size in tokens |
+| `items[].licensing` | string | License type (`proprietary`, `apache-2.0`, `mit`, `other`, etc.) |
+| `items[].created_at` | string | ISO 8601 timestamp when the model was added |
+| `items[].updated_at` | string | ISO 8601 timestamp when the model was last updated |
 | `pagination.page` | integer | Current page number |
 | `pagination.limit` | integer | Items per page |
 | `pagination.total` | integer | Total number of matching models |

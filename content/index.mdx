@@ -13,15 +13,15 @@ OpenModels is an open-source registry for LLM models and inference providers. It
 
 ### Model Registry
 
-A community-maintained, schema-validated registry of 117+ LLM models from vendors including OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek, Microsoft, Alibaba, IBM, Xiaomi, Tencent, Poolside, Cohere, OpenBMB, Upstage, LLM360, AI21 Labs, TII, 01.AI, Writer, Databricks, Snowflake, Stability AI, Uzbek LLM Lab, Yandex, Sber, Sarvam AI, Z.ai, Sakana AI, and more. Every model definition is machine-readable and version-controlled.
+A community-maintained, schema-validated registry of 223 LLM models as of October 24, 2026. Every model definition is machine-readable and version-controlled; hosted provider connections are tracked separately from canonical model records.
 
 ### Provider Comparison
 
-Compare 51+ inference providers side-by-side — pricing, capabilities, context windows, and availability. Find the best provider for your use case with structured, up-to-date data.
+Compare 53 inference providers side-by-side — pricing, capabilities, context windows, and observed availability. Published prices preserve their original precision; unknown prices and rate limits are not presented as zero.
 
 ### Real-Time Telemetry
 
-Monitor provider health, latency, and reliability through live telemetry data. Health probes run every 5 minutes and latency probes every 15 minutes, giving you up-to-date performance metrics for informed provider selection.
+Inspect observed provider reachability and inference latency. The current worker schedule runs health probes hourly and latency probes at 06:15 and 18:15 UTC, subject to credentials and provider policies. Missing or stale measurements display as no data, not 0% uptime or 0 ms latency. These synthetic checks are not a provider SLA or a guarantee that every model can serve authenticated requests.
 
 ### Insights
 
@@ -43,16 +43,16 @@ The entire registry is open source and community-driven. Contribute new models, 
   <Cards.Card title="Installation" href="/getting-started/installation">
     Set up the registry locally for development and contributions.
   </Cards.Card>
-  <Cards.Card title="Architecture" href="/architecture">
+  <Cards.Card title="Architecture" href="/architecture/overview">
     Understand how OpenModels works — registry structure, validation, and data flow.
   </Cards.Card>
   <Cards.Card title="API Reference" href="/api-reference">
     Complete reference for all API endpoints including models, providers, and telemetry.
   </Cards.Card>
-  <Cards.Card title="Contributing" href="/contributing">
+  <Cards.Card title="Contributing" href="/contributing/adding-model">
     Add new models, providers, and mappings to the registry.
   </Cards.Card>
-  <Cards.Card title="Roadmap" href="/roadmap">
+  <Cards.Card title="Roadmap" href="/roadmap/v3">
     See what's planned for future releases.
   </Cards.Card>
 </Cards>
@@ -60,7 +60,7 @@ The entire registry is open source and community-driven. Contribute new models, 
 ## Quick Links
 
 - **Registry Repository** — [github.com/openmodelsrun/openmodels](https://github.com/openmodelsrun/openmodels)
-- **Current Coverage** — 117+ models · 51+ providers · 185+ mappings
+- **Coverage (October 24, 2026)** — 223 models · 53 providers · 299 mappings; check [`/api/stats`](https://api.openmodels.run/api/stats) for current counts
 - **Live Platform** — [openmodels.run](https://openmodels.run) — browse, search, and compare models
 - **API** — [api.openmodels.run](https://api.openmodels.run) — public REST API, no auth required
 - **Schema Definitions** — Standardized YAML schemas for models, providers, and pricing

@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 const navbar = (
   <Navbar
     logo={<Logo />}
-    logoLink="https://www.openmodels.run"
+    logoLink="https://openmodels.run"
     projectLink="https://github.com/openmodelsrun/openmodels"
   />
 )

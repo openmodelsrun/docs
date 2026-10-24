@@ -61,13 +61,13 @@ Build the REST API for model discovery, comparison, and provider lookup.
 
 Real-time monitoring of provider health, latency, and availability.
 
-- [x] Health probe scheduler (5-minute intervals)
-- [x] Latency probe scheduler (15-minute intervals)
+- [x] Health probe scheduler (currently hourly)
+- [x] Latency probe scheduler (1currently hourly)
 - [x] Time-to-first-token measurement
 - [x] Total response time measurement
-- [x] `GET /api/telemetry/health/:provider_id` endpoint
-- [x] `GET /api/telemetry/latency/:provider_id` endpoint
-- [x] `GET /api/telemetry/ranked/:model_id` — ranked providers by performance
+- [x] `GET /api/providers/:id/health` endpoint
+- [x] `GET /api/providers/:id/latency` endpoint
+- [x] `GET /api/models/:id/providers/ranked` — ranked providers by performance
 - [x] Historical telemetry data retention (30 days)
 - [x] "Unknown" status for providers with no/stale health data
 - [x] Health probe accepts 401/403 as reachable (no false negatives)

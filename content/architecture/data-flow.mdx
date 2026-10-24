@@ -70,7 +70,7 @@ sequenceDiagram
 | `/api/models/popular` | Popular models ranked by relevance |
 | `/api/providers` | List all providers |
 | `/api/search` | Unified search across models and providers |
-| `/api/telemetry/*` | Provider health and latency data |
+| `/api/providers/{id}/health`, `/api/providers/{id}/latency` | Provider health and latency data |
 
 ## Telemetry Collection Flow
 
@@ -84,7 +84,7 @@ sequenceDiagram
     participant API as OpenModels API
     participant User
 
-    loop Every 5 minutes
+    loop Hourly at minute 00 UTC
         Telemetry->>Policy: Check if provider enabled
         alt Provider enabled
             Telemetry->>Provider: Send health check request
@@ -98,7 +98,7 @@ sequenceDiagram
         end
     end
 
-    loop Every 15 minutes
+    loop At 06:15 and 18:15 UTC
         Telemetry->>Policy: Check daily limit
         alt Under limit
             Telemetry->>Provider: Send authenticated inference request (streaming)
@@ -108,10 +108,10 @@ sequenceDiagram
         end
     end
 
-    User->>API: GET /api/telemetry/health/{provider_id}
+    User->>API: GET /api/providers/{id}/health
     API-->>User: JSON response with health status
 
-    User->>API: GET /api/telemetry/ranked/{model_id}
+    User->>API: GET /api/models/{id}/providers/ranked
     API-->>User: JSON response with ranked providers
 ```
 
@@ -119,32 +119,33 @@ sequenceDiagram
 
 | Metric | Collection Interval | Retention |
 |--------|-------------------|-----------|
-| **Health status** | Every 5 minutes | 30 days |
-| **Time to first token (TTFT)** | Every 15 minutes | 30 days |
-| **Total response time** | Every 15 minutes | 30 days |
+| **Health status** | Hourly at minute 00 UTC | 30 days |
+| **Time to first token (TTFT)** | At 06:15 and 18:15 UTC | 30 days |
+| **Total response time** | At 06:15 and 18:15 UTC | 30 days |
 | **Availability (uptime %)** | Computed from health records | Rolling 7 days |
-| **Probe region** | Recorded per measurement | 30 days |
+| **Freshness** | Health older than 90 minutes is unknown | Missing metrics are `null` |
 
 ### Probe Policies
 
 Each provider can have a custom probe policy controlling:
 
 - **Enabled/disabled** — Whether probes run for this provider
-- **Interval** — Custom probe frequency (default: 15 minutes for latency, 5 minutes for health)
+- **Schedule** — Celery beat controls the global cadence above; the policy's `interval_minutes` setting does not reschedule the beat task
 - **Daily limit** — Maximum probes per day to control costs (default: 96)
 
 Policies are tracked in Redis with daily counters that auto-expire after 24 hours.
 
 ### Provider Ranking Algorithm
 
-When a user requests ranked providers for a model via `GET /api/telemetry/ranked/{model_id}`, the API computes a composite score:
+When a user requests ranked providers for a model via `GET /api/models/{id}/providers/ranked`, the API computes a composite score:
 
 | Factor | Weight | Source |
 |--------|--------|--------|
-| Uptime percentage (7-day rolling) | 40% | Health probe records |
-| Median latency (TTFT) | 30% | Latency probe records |
-| Price per million tokens | 20% | Registry mapping data |
-| Median total response time | 10% | Latency probe records |
+| Uptime percentage (24-hour rolling) | 40% | Usable health probe records |
+| Mean latency (TTFT) | 35% | Provider-wide valid samples in the last 24 hours |
+| Mean input/output price per million tokens | 25% | Registry mapping data |
+
+Unknown health/latency earns no credit for that factor but stays `null` in the response. Model provider lists and comparisons use model-specific latency; this ranked endpoint currently uses provider-wide latency. Local TLS trust failures are excluded from uptime rather than counted as provider outages.
 
 ## End-to-End Data Lifecycle
 

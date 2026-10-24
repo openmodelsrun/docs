@@ -89,20 +89,21 @@ The public API at `api.openmodels.run` provides model/provider discovery and tel
 | GET | `/api/stats` | Registry statistics (counts + last sync) |
 | GET | `/api/search` | Unified search across models and providers |
 | GET | `/api/search/index` | Lightweight search index for client-side use |
-| GET | `/api/telemetry/health/{provider_id}` | Provider health status |
-| GET | `/api/telemetry/latency/{provider_id}` | Provider latency metrics |
-| GET | `/api/telemetry/ranked/{model_id}` | Ranked providers by performance |
+| GET | `/api/providers/{id}/health` | Provider health status |
+| GET | `/api/providers/{id}/latency` | Provider latency metrics |
+| GET | `/api/models/{id}/providers/ranked` | Ranked providers by performance |
 | GET | `/api/health` | System health check |
 
 ### 4. Telemetry
 
 Automated monitoring of provider health and latency:
 
-- **Health probes** — Every 5 minutes, checks provider API availability (accepts 401/403 as reachable)
-- **Latency probes** — Every 15 minutes, measures time-to-first-token and total response time via streaming inference
+- **Health probes** — Hourly at minute 00 UTC, checks provider API availability (accepts 401/403 as reachable)
+- **Latency probes** — At 06:15 and 18:15 UTC, measures time-to-first-token and total response time via streaming inference
 - **Probe policies** — Per-provider configuration with daily limits and cost controls
 - **Data retention** — 30 days of historical telemetry data
 - Results are exposed via the API's telemetry endpoints and used for provider ranking
+- Missing/stale metrics are `null`, not zero. Local TLS verification failures do not count as provider outages. Health measures reachability, not successful authenticated inference; see [Telemetry API](/api-reference/telemetry).
 
 ### 5. Web Interface
 
