@@ -28,7 +28,7 @@ The dev server runs at [http://localhost:3040](http://localhost:3040).
 npm run build
 ```
 
-Produces a static export in `out/` (via Next.js `output: 'export'`). The `postbuild` step generates the sitemap with `next-sitemap`.
+Produces a static export in `out/` (via Next.js `output: 'export'`). The `postbuild` step generates the sitemap with `next-sitemap` and the search index with Pagefind. It fails if `out/_pagefind/pagefind.js` is missing.
 
 Useful scripts:
 
